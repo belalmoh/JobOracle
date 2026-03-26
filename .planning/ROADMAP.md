@@ -7,7 +7,7 @@
 
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
-| 1 | Project Setup + Resume | Upload and parse resumes, generate keywords | RES-01 to RES-07, SET-01 to SET-03 | 5 |
+| 1 | Project Setup + Resume | Upload and parse resumes, generate keywords | RES-01 to RES-07, SET-01 to SET-03 | 5 ✓ |
 | 2 | Job Search | Search multiple platforms, display and filter jobs | JOB-01 to JOB-08 | 8 |
 | 3 | Scoring + Tracking | Match resume to jobs, track applications, notify | SCO-01 to SCO-04, APP-01 to APP-05, NOT-01 to NOT-04, APL-01 to APL-02 | 11 |
 | 4 | Auto-Apply | Automate application submission via Playwright | AUTO-01 to AUTO-05 | 5 |
@@ -18,6 +18,8 @@
 ### Phase 1: Project Setup + Resume Management
 
 **Goal:** Set up the project structure and implement resume upload, parsing, and keyword generation.
+
+**Status:** ✓ Complete (2026-03-26)
 
 **Requirements:**
 - RES-01: Upload PDF resume
