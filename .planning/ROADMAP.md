@@ -68,6 +68,11 @@
 
 **Dependencies:** Phase 1 complete
 
+**Plans:**
+- [ ] 02-01-PLAN.md — Backend: Job Search API & Integration
+- [ ] 02-02-PLAN.md — Backend: Job Scoring & Matching
+- [ ] 02-03-PLAN.md — Frontend: Job Search UI
+
 ---
 
 ### Phase 3: Scoring + Application Tracking + Notifications
