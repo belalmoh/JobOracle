@@ -48,6 +48,8 @@
 
 **Goal:** Implement multi-platform job search, display, and filtering.
 
+**Status:** In Progress (2/3 plans complete)
+
 **Requirements:**
 - JOB-01: Configure job sources (LinkedIn, Indeed, etc.)
 - JOB-02: Enter search keywords
@@ -70,7 +72,7 @@
 
 **Plans:**
 - [x] 02-01-PLAN.md — Backend: Job Search API & Integration (Complete)
-- [ ] 02-02-PLAN.md — Backend: Job Scoring & Matching
+- [x] 02-02-PLAN.md — Backend: Job Scoring & Matching (Complete)
 - [ ] 02-03-PLAN.md — Frontend: Job Search UI
 
 ---
