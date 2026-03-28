@@ -12,16 +12,15 @@ Help job seekers land interviews faster by automating the tedious parts of job h
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Job source configuration (LinkedIn, Indeed, etc.) — *Validated in Phase 2: Job Search*
+- [x] Job search across configured sources — *Validated in Phase 2: Job Search*
+- [x] Job list display with filters — *Validated in Phase 2: Job Search*
+- [x] Resume-to-job compatibility scoring — *Validated in Phase 2: Job Search*
 
 ### Active
 
 - [ ] Resume upload and parsing (extract skills, experience, keywords)
 - [ ] Auto keyword generation from parsed resume
-- [ ] Job source configuration (LinkedIn, Indeed, etc.)
-- [ ] Job search across configured sources
-- [ ] Job list display with filters
-- [ ] Resume-to-job compatibility scoring
 - [ ] Application tracking (applied, pending, rejected)
 - [ ] Notification system (email, browser)
 - [ ] Manual apply workflow
@@ -56,4 +55,4 @@ Help job seekers land interviews faster by automating the tedious parts of job h
 | Next.js + FastAPI split | User preference for Python backend | — Pending |
 
 ---
-*Last updated: 2026-03-26 after initialization*
+*Last updated: 2026-03-28 after Phase 2 completion*
