@@ -22,9 +22,9 @@
 - [ ] **JOB-03**: User can set location filter (city, remote, etc.)
 - [ ] **JOB-04**: System searches multiple job platforms simultaneously
 - [ ] **JOB-05**: System removes duplicate job listings
-- [ ] **JOB-06**: User can view list of matching jobs (title, company, location, source, date)
-- [ ] **JOB-07**: User can view full job details (description, requirements, apply link)
-- [ ] **JOB-08**: User can filter job list by source, date, location
+- [x] **JOB-06**: User can view list of matching jobs (title, company, location, source, date)
+- [x] **JOB-07**: User can view full job details (description, requirements, apply link)
+- [x] **JOB-08**: User can filter job list by source, date, location
 
 ### Scoring/Matching
 
