@@ -1,12 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func
 from app.database import get_db
-from app.models.models import Job, UserSettings
+from app.models.models import Job, UserSettings, Keyword
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 import pandas as pd
+import json
+import subprocess
 
 router = APIRouter()
 
@@ -38,6 +40,26 @@ class JobResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class JobScoreRequest(BaseModel):
+    job_id: int
+
+
+class JobScoreResponse(BaseModel):
+    job_id: int
+    score: float
+    matched_keywords: List[str]
+    explanation: str
+
+
+class JobScoreAllRequest(BaseModel):
+    job_ids: Optional[List[int]] = None
+
+
+class JobScoreAllResponse(BaseModel):
+    jobs: List[JobScoreResponse]
+    total_scored: int
 
 
 # Job source mapping for jobspy
@@ -83,6 +105,132 @@ async def is_duplicate(
         )
     )
     return result.scalar_one_or_none()
+
+
+async def get_user_keywords(db: AsyncSession) -> List[str]:
+    """Fetch all keywords for the current user."""
+    result = await db.execute(select(Keyword).where(Keyword.user_id == 1))
+    keywords = result.scalars().all()
+    return [str(k.keyword) for k in keywords]
+
+
+def calculate_keyword_overlap(
+    job_text: str, user_keywords: List[str]
+) -> tuple[List[str], float]:
+    """
+    Calculate keyword overlap between job text and user keywords.
+    Returns matched keywords and score (0-100).
+    """
+    if not user_keywords:
+        return [], 0.0
+
+    job_text_lower = job_text.lower()
+    matched = [kw for kw in user_keywords if kw.lower() in job_text_lower]
+
+    keyword_score = (len(matched) / len(user_keywords)) * 100
+    return matched, round(keyword_score, 2)
+
+
+async def calculate_semantic_similarity(
+    job_text: str, user_keywords: List[str]
+) -> float:
+    """
+    Calculate semantic similarity using Ollama LLM.
+    Returns score (0-100).
+    """
+    if not user_keywords:
+        return 0.0
+
+    # Truncate job text to avoid overly long prompts
+    truncated_job = job_text[:1000] if len(job_text) > 1000 else job_text
+    keywords_str = ", ".join(user_keywords[:20])  # Limit to 20 keywords
+
+    prompt = f"""Rate how well this job matches the resume keywords from 0-100.
+
+Job description:
+{truncated_job}
+
+Resume keywords: {keywords_str}
+
+Respond with ONLY a number from 0-100. No explanation."""
+
+    try:
+        # Use Ollama REST API via curl
+        import urllib.request
+        import urllib.error
+
+        data = json.dumps(
+            {
+                "model": "llama3.2",
+                "messages": [{"role": "user", "content": prompt}],
+                "stream": False,
+            }
+        ).encode("utf-8")
+
+        req = urllib.request.Request(
+            "http://localhost:11434/api/chat",
+            data=data,
+            headers={"Content-Type": "application/json"},
+        )
+
+        with urllib.request.urlopen(req, timeout=60) as response:
+            result = json.loads(response.read().decode("utf-8"))
+            content = result.get("message", {}).get("content", "")
+
+            # Extract numeric score from response
+            import re
+
+            match = re.search(r"\d+", content)
+            if match:
+                score = float(match.group())
+                return min(100.0, max(0.0, score))
+    except Exception as e:
+        print(f"Semantic similarity calculation failed: {e}")
+
+    return 50.0  # Default middle score if Ollama fails
+
+
+async def score_job(db: AsyncSession, job: Job) -> dict:
+    """
+    Score a single job against user's keywords.
+    Returns dict with score, matched_keywords, and explanation.
+    """
+    # Get user keywords
+    user_keywords = await get_user_keywords(db)
+
+    if not user_keywords:
+        return {
+            "score": 0.0,
+            "matched_keywords": [],
+            "explanation": "No keywords configured. Add keywords to see match scores.",
+        }
+
+    # Prepare job text for analysis
+    job_text = f"{job.title} {job.description or ''} {job.requirements or ''}"
+
+    # Calculate keyword overlap (30% weight)
+    matched_keywords, keyword_score = calculate_keyword_overlap(job_text, user_keywords)
+
+    # Calculate semantic similarity (70% weight)
+    semantic_score = await calculate_semantic_similarity(job_text, user_keywords)
+
+    # Combine scores
+    final_score = round((keyword_score * 0.3) + (semantic_score * 0.7), 2)
+
+    # Generate explanation
+    if matched_keywords:
+        keywords_str = ", ".join(matched_keywords[:5])
+        if len(matched_keywords) > 5:
+            keywords_str += f" and {len(matched_keywords) - 5} more"
+        explanation = f"Your keywords '{keywords_str}' match this job. Overall match: {final_score}%"
+    else:
+        explanation = f"No keyword matches found. Overall match: {final_score}%"
+
+    return {
+        "score": final_score,
+        "matched_keywords": matched_keywords,
+        "explanation": explanation,
+    }
 
 
 @router.post("/search")
@@ -234,17 +382,31 @@ async def get_jobs(
     source: Optional[str] = Query(None),
     location: Optional[str] = Query(None),
     date_from: Optional[str] = Query(None),
+    min_score: Optional[float] = Query(None, ge=0, le=100),
+    sort: Optional[str] = Query("score", description="Sort by: score, date, source"),
     db: AsyncSession = Depends(get_db),
 ):
     """
-    List saved jobs with optional filters.
+    List saved jobs with optional filters and sorting.
 
     - source: filter by job source
     - location: filter by location
     - date_from: filter by posted date (ISO format)
+    - min_score: filter by minimum compatibility score (0-100)
+    - sort: sort order - "score" (default, descending), "date" (newest first), "source"
     """
-    query = select(Job).order_by(Job.created_at.desc())
+    # Determine sort order
+    if sort == "score":
+        # Score descending, nulls last
+        query = select(Job).order_by(Job.compatibility_score.desc().nullslast())
+    elif sort == "source":
+        query = select(Job).order_by(Job.source, Job.created_at.desc())
+    else:  # date or default
+        query = select(Job).order_by(
+            Job.posted_date.desc().nullslast(), Job.created_at.desc()
+        )
 
+    # Apply filters
     if source:
         query = query.where(Job.source == source)
     if location:
@@ -255,6 +417,8 @@ async def get_jobs(
             query = query.where(Job.posted_date >= from_date)
         except ValueError:
             pass  # Ignore invalid date format
+    if min_score is not None:
+        query = query.where(Job.compatibility_score >= min_score)
 
     result = await db.execute(query)
     jobs = result.scalars().all()
@@ -275,3 +439,143 @@ async def get_job(
         raise HTTPException(status_code=404, detail="Job not found")
 
     return job
+
+
+@router.post("/score", response_model=JobScoreResponse)
+async def score_single_job(
+    request: JobScoreRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Score a single job against user's keywords.
+
+    - Calculates keyword overlap (30% weight)
+    - Calculates semantic similarity using Ollama (70% weight)
+    - Updates job with compatibility_score and match_keywords
+    """
+    # Fetch the job
+    result = await db.execute(select(Job).where(Job.id == request.job_id))
+    job = result.scalar_one_or_none()
+
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    # Calculate score
+    score_result = await score_job(db, job)
+
+    # Update job in database
+    job.compatibility_score = score_result["score"]
+    job.match_keywords = score_result["matched_keywords"]
+    await db.commit()
+    await db.refresh(job)
+
+    return JobScoreResponse(
+        job_id=int(job.id),
+        score=score_result["score"],
+        matched_keywords=score_result["matched_keywords"],
+        explanation=score_result["explanation"],
+    )
+
+
+@router.post("/score-all", response_model=JobScoreAllResponse)
+async def score_all_jobs(
+    request: JobScoreAllRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Score all jobs for the current user.
+
+    - If job_ids provided, scores only those jobs
+    - Otherwise scores all active jobs
+    - Returns results sorted by score descending
+    - Updates all jobs in database with scores
+    """
+    # Build query
+    if request.job_ids:
+        query = select(Job).where(Job.id.in_(request.job_ids))
+    else:
+        query = select(Job).where(Job.status == "active")
+
+    result = await db.execute(query)
+    jobs = result.scalars().all()
+
+    if not jobs:
+        return JobScoreAllResponse(jobs=[], total_scored=0)
+
+    # Score each job
+    scored_jobs = []
+    for job in jobs:
+        score_result = await score_job(db, job)
+
+        # Update job in database
+        job.compatibility_score = score_result["score"]
+        job.match_keywords = score_result["matched_keywords"]
+
+        scored_jobs.append(
+            JobScoreResponse(
+                job_id=int(job.id),
+                score=score_result["score"],
+                matched_keywords=score_result["matched_keywords"],
+                explanation=score_result["explanation"],
+            )
+        )
+
+    # Save all updates
+    await db.commit()
+
+    # Sort by score descending
+    scored_jobs.sort(key=lambda x: x.score, reverse=True)
+
+    return JobScoreAllResponse(jobs=scored_jobs, total_scored=len(scored_jobs))
+
+
+@router.post("/score-all", response_model=JobScoreAllResponse)
+async def score_all_jobs(
+    request: JobScoreAllRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Score all jobs for the current user.
+
+    - If job_ids provided, scores only those jobs
+    - Otherwise scores all active jobs
+    - Returns results sorted by score descending
+    - Updates all jobs in database with scores
+    """
+    # Build query
+    if request.job_ids:
+        query = select(Job).where(Job.id.in_(request.job_ids))
+    else:
+        query = select(Job).where(Job.status == "active")
+
+    result = await db.execute(query)
+    jobs = result.scalars().all()
+
+    if not jobs:
+        return JobScoreAllResponse(jobs=[], total_scored=0)
+
+    # Score each job
+    scored_jobs = []
+    for job in jobs:
+        score_result = await score_job(db, job)
+
+        # Update job in database
+        job.compatibility_score = score_result["score"]
+        job.match_keywords = score_result["matched_keywords"]
+
+        scored_jobs.append(
+            JobScoreResponse(
+                job_id=job.id,
+                score=score_result["score"],
+                matched_keywords=score_result["matched_keywords"],
+                explanation=score_result["explanation"],
+            )
+        )
+
+    # Save all updates
+    await db.commit()
+
+    # Sort by score descending
+    scored_jobs.sort(key=lambda x: x.score, reverse=True)
+
+    return JobScoreAllResponse(jobs=scored_jobs, total_scored=len(scored_jobs))
