@@ -106,7 +106,13 @@ class Job(Base):
     salary = Column(String(100), nullable=True)
     compatibility_score = Column(Float, nullable=True)
     match_keywords = Column(JSON, default=list)
+    is_duplicate = Column(Boolean, default=False)
+    duplicate_of_id = Column(Integer, ForeignKey("jobs.id"), nullable=True)
+    status = Column(String(20), default="active")  # active, expired, saved
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationship for duplicate tracking
+    duplicate_of = relationship("Job", remote_side=[id], foreign_keys=[duplicate_of_id])
 
 
 class Application(Base):
