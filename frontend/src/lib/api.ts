@@ -69,4 +69,33 @@ export const api = {
       body: JSON.stringify(data),
     }),
   },
+  
+  jobs: {
+    search: async (keywords: string, location: string, jobSources?: string[]) =>
+      fetchAPI("/jobs/search", {
+        method: "POST",
+        body: JSON.stringify({ keywords, location, job_sources: jobSources }),
+      }),
+    list: async (params?: {
+      source?: string;
+      location?: string;
+      date_from?: string;
+      sort?: string;
+      min_score?: number;
+    }) => {
+      const query = new URLSearchParams(params as Record<string, string>).toString();
+      return fetchAPI(`/jobs${query ? `?${query}` : ""}`);
+    },
+    get: async (id: number) => fetchAPI(`/jobs/${id}`),
+    score: async (jobId: number) =>
+      fetchAPI("/jobs/score", {
+        method: "POST",
+        body: JSON.stringify({ job_id: jobId }),
+      }),
+    scoreAll: async (jobIds?: number[]) =>
+      fetchAPI("/jobs/score-all", {
+        method: "POST",
+        body: JSON.stringify({ job_ids: jobIds }),
+      }),
+  },
 }
