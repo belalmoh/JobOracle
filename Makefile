@@ -13,7 +13,7 @@ frontend:
 
 # Install all dependencies
 install:
-	cd backend && pip install -r requirements.txt
+	cd backend && uv pip install -r requirements.txt
 	cd frontend && npm install
 
 # Initial setup

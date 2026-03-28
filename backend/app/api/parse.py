@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from app.database import get_db
-from app.models.models import Resume
-from app.services.parse_service import resume_parser_service
+from app.services.resume_service import resume_service
+
 
 router = APIRouter()
 
@@ -15,46 +14,17 @@ class ParseRequest(BaseModel):
 
 @router.post("/parse")
 async def parse_resume(request: ParseRequest, db: AsyncSession = Depends(get_db)):
-    resume_id = request.resume_id
-    result = await db.execute(
-        select(Resume).where(Resume.id == resume_id, Resume.user_id == 1)
-    )
-    resume = result.scalar_one_or_none()
-    if not resume:
-        raise HTTPException(status_code=404, detail="Resume not found")
-
-    if not resume.extracted_text:
-        raise HTTPException(status_code=400, detail="No extracted text to parse")
-
+    """Parse a resume."""
     try:
-        parsed_data = resume_parser_service.parse(resume.extracted_text)
-
-        resume.parsed_data = parsed_data
-        resume.status = "parsed"
-        await db.commit()
-        await db.refresh(resume)
-
-        return {
-            "resume_id": resume.id,
-            "parsed_data": parsed_data,
-            "status": resume.status,
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Parse failed: {str(e)}")
+        return await resume_service.parse_resume(db, request.resume_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/resumes/{resume_id}/parsed")
 async def get_parsed_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(Resume).where(Resume.id == resume_id, Resume.user_id == 1)
-    )
-    resume = result.scalar_one_or_none()
-    if not resume:
-        raise HTTPException(status_code=404, detail="Resume not found")
-
-    return {
-        "id": resume.id,
-        "parsed_data": resume.parsed_data,
-        "extracted_text": resume.extracted_text,
-        "status": resume.status,
-    }
+    """Get parsed resume data."""
+    try:
+        return await resume_service.get_parsed_resume(db, resume_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
