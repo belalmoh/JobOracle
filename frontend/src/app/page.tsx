@@ -137,19 +137,8 @@ export default function Home() {
     try {
       const result = await api.parse.parse(resumeId)
       setParsedData(result.parsed_data)
-      
-      await handleGenerateKeywords()
     } catch (err) {
       console.error("Parse failed:", err)
-    }
-  }
-
-  const handleGenerateKeywords = async () => {
-    try {
-      await api.keywords.generate()
-      loadKeywords()
-    } catch (err) {
-      console.error("Keyword generation failed:", err)
     }
   }
 
@@ -182,6 +171,23 @@ export default function Home() {
       setShowSettings(false)
     } catch (err) {
       console.error("Failed to save settings:", err)
+    }
+  }
+
+  const handleDeleteResume = async (resumeId: number) => {
+    try {
+      const result = await api.upload.delete(resumeId)
+      setResumes(prev => prev.filter(r => r.id !== resumeId))
+      if (selectedResume?.id === resumeId) {
+        setSelectedResume(null)
+        setExtractedText(null)
+        setParsedData(null)
+      }
+      if (result.cleared_user_data) {
+        setKeywords([])
+      }
+    } catch (err) {
+      console.error("Failed to delete resume:", err)
     }
   }
 
@@ -256,20 +262,36 @@ export default function Home() {
               {resumes.length > 0 ? (
                 <div className="space-y-2">
                   {resumes.map(resume => (
-                    <button
+                    <div
                       key={resume.id}
-                      onClick={() => selectResume(resume)}
-                      className={`w-full text-left p-3 rounded-lg transition-colors ${
+                      className={`w-full text-left p-3 rounded-lg transition-colors group relative ${
                         selectedResume?.id === resume.id
                           ? "bg-[var(--accent)]/10 border border-[var(--accent)]"
                           : "hover:bg-[oklch(0.967_0.001_286.375)]"
                       }`}
                     >
-                      <p className="font-medium text-sm truncate">{resume.filename}</p>
-                      <p className="text-xs text-[oklch(0.55_0_0)]">
-                        {resume.file_type.toUpperCase()} • {resume.status}
-                      </p>
-                    </button>
+                      <button
+                        onClick={() => selectResume(resume)}
+                        className="w-full"
+                      >
+                        <p className="font-medium text-sm truncate">{resume.filename}</p>
+                        <p className="text-xs text-[oklch(0.55_0_0)]">
+                          {resume.file_type.toUpperCase()} • {resume.status}
+                        </p>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteResume(resume.id)
+                        }}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-[oklch(0.55_0_0)] hover:text-[var(--destructive)] transition-opacity"
+                        title="Delete resume"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="currentColor">
+                          <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/>
+                        </svg>
+                      </button>
+                    </div>
                   ))}
                 </div>
               ) : (

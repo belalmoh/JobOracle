@@ -4,7 +4,7 @@ import { CaretRight, CaretDown, Trash } from "@phosphor-icons/react"
 interface ParsedData {
   contact?: { name?: string; email?: string; phone?: string; location?: string }
   summary?: string
-  skills?: string[]
+  skills?: string[] | { [category: string]: string[] }
   experience?: { title?: string; company?: string; duration?: string; description?: string }[]
   education?: { degree?: string; school?: string; year?: string }[]
 }
@@ -92,23 +92,44 @@ export function ParsedDataDisplay({
           {expandedSections.skills && (
             <div className="p-4 pt-0 border-t border-[oklch(0.967_0.001_286.375)]">
               <div className="flex flex-wrap gap-2">
-                {parsedData.skills?.map((skill, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full text-sm"
-                  >
-                    {skill}
-                    {onRemoveSkill && (
-                      <button
-                        onClick={() => onRemoveSkill(skill)}
-                        className="hover:text-[var(--destructive)]"
+                {parsedData.skills && typeof parsedData.skills === 'object' && !Array.isArray(parsedData.skills) ? (
+                  Object.entries(parsedData.skills).map(([category, skills]) => 
+                    skills && Array.isArray(skills) && skills.map((skill, idx) => (
+                      <span
+                        key={`${category}-${idx}`}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full text-sm"
                       >
-                        <Trash size={14} />
-                      </button>
-                    )}
-                  </span>
-                ))}
-                {!parsedData.skills?.length && (
+                        {skill}
+                        {onRemoveSkill && (
+                          <button
+                            onClick={() => onRemoveSkill(skill)}
+                            className="hover:text-[var(--destructive)]"
+                          >
+                            <Trash size={14} />
+                          </button>
+                        )}
+                      </span>
+                    ))
+                  )
+                ) : parsedData.skills && Array.isArray(parsedData.skills) ? (
+                  parsedData.skills.map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full text-sm"
+                    >
+                      {skill}
+                      {onRemoveSkill && (
+                        <button
+                          onClick={() => onRemoveSkill(skill)}
+                          className="hover:text-[var(--destructive)]"
+                        >
+                          <Trash size={14} />
+                        </button>
+                      )}
+                    </span>
+                  ))
+                ) : null}
+                {(!parsedData.skills || (typeof parsedData.skills === 'object' && Object.keys(parsedData.skills).length === 0)) && (
                   <p className="text-sm text-[oklch(0.55_0_0)]">No skills found</p>
                 )}
               </div>

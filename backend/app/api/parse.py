@@ -3,36 +3,19 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.database import get_db
-from app.models.models import Resume, Keyword
-import json
+from app.models.models import Resume
+from app.services.parse_service import resume_parser_service
 
 router = APIRouter()
-
-PARSED_SCHEMA = {
-    "contact": {"name": "", "email": "", "phone": "", "location": ""},
-    "summary": "",
-    "skills": [],
-    "experience": [],
-    "education": [],
-}
 
 
 class ParseRequest(BaseModel):
     resume_id: int
 
 
-class ParseResponse(BaseModel):
-    resume_id: int
-    parsed_data: dict
-    status: str
-
-
 @router.post("/parse")
 async def parse_resume(request: ParseRequest, db: AsyncSession = Depends(get_db)):
     resume_id = request.resume_id
-    result = await db.execute(
-        select(Resume).where(Resume.id == resume_id, Resume.user_id == 1)
-    )
     result = await db.execute(
         select(Resume).where(Resume.id == resume_id, Resume.user_id == 1)
     )
@@ -44,74 +27,7 @@ async def parse_resume(request: ParseRequest, db: AsyncSession = Depends(get_db)
         raise HTTPException(status_code=400, detail="No extracted text to parse")
 
     try:
-        parsed_data = json.loads(json.dumps(PARSED_SCHEMA))
-
-        text = resume.extracted_text.lower()
-
-        skills_list = []
-        tech_keywords = [
-            "python",
-            "javascript",
-            "typescript",
-            "react",
-            "node",
-            "sql",
-            "aws",
-            "docker",
-            "kubernetes",
-            "git",
-            "html",
-            "css",
-            "java",
-            "c++",
-            "golang",
-            "rust",
-            "php",
-            "ruby",
-            "swift",
-            "kotlin",
-            "scala",
-            "r",
-            "matlab",
-            "pandas",
-            "numpy",
-            "scikit",
-            "tensorflow",
-            "pytorch",
-            "keras",
-            "sqlalchemy",
-            "fastapi",
-            "flask",
-            "django",
-            "spring",
-            "express",
-            "angular",
-            "vue",
-            "svelte",
-            "nextjs",
-            "graphql",
-            "rest",
-            "api",
-            "microservices",
-            "linux",
-            "bash",
-            "shell",
-            "jenkins",
-            "ci/cd",
-            "agile",
-            "scrum",
-            "jira",
-            "confluence",
-        ]
-
-        for skill in tech_keywords:
-            if skill in text:
-                skills_list.append(skill)
-
-        parsed_data["skills"] = list(set(skills_list))
-        parsed_data["summary"] = "Experienced professional with technical expertise."
-        parsed_data["experience"] = []
-        parsed_data["education"] = []
+        parsed_data = resume_parser_service.parse(resume.extracted_text)
 
         resume.parsed_data = parsed_data
         resume.status = "parsed"

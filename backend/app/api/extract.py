@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.database import get_db
 from app.models.models import Resume
-import pymupdf as fitz
+import fitz
 import docx
 
 router = APIRouter()

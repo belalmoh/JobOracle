@@ -1,9 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from app.api import uploads, extract, parse, keywords, settings, jobs, applications
-from app.database import engine, Base
+from app.database import init_db, close_db, get_db_info
 
-app = FastAPI(title="JobOracle API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+    await close_db()
+
+
+app = FastAPI(title="JobOracle API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,12 +31,12 @@ app.include_router(jobs.router, prefix="/api", tags=["jobs"])
 app.include_router(applications.router, prefix="/api", tags=["applications"])
 
 
-@app.on_event("startup")
-async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "JobOracle API"}
+    db_info = await get_db_info()
+    return {
+        "status": "healthy",
+        "service": "JobOracle API",
+        "database": db_info["database_type"],
+        "fallback": db_info["is_fallback"],
+    }

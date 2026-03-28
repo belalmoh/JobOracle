@@ -83,6 +83,9 @@ async def get_resumes(db: AsyncSession = Depends(get_db)):
 
 @router.delete("/resumes/{resume_id}")
 async def delete_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import delete
+    from app.models.models import Resume, Keyword, UserSettings, Application
+
     result = await db.execute(
         select(Resume).where(Resume.id == resume_id, Resume.user_id == 1)
     )
@@ -94,6 +97,15 @@ async def delete_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
         os.remove(resume.file_path)
 
     await db.delete(resume)
+
+    result = await db.execute(select(Resume).where(Resume.user_id == 1))
+    remaining_resumes = result.scalars().all()
+
+    if not remaining_resumes:
+        await db.execute(delete(Keyword).where(Keyword.user_id == 1))
+        await db.execute(delete(UserSettings).where(UserSettings.user_id == 1))
+        await db.execute(delete(Application).where(Application.user_id == 1))
+
     await db.commit()
 
-    return {"message": "Resume deleted"}
+    return {"message": "Resume deleted", "cleared_user_data": not remaining_resumes}

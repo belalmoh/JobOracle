@@ -48,7 +48,8 @@ export const api = {
   },
   
   keywords: {
-    list: async () => fetchAPI("/keywords"),
+    list: async () => fetchAPI("/keywords/all"),
+    search: async (query: string) => fetchAPI(`/keywords?search=${encodeURIComponent(query)}`),
     create: async (keyword: string) => fetchAPI("/keywords", {
       method: "POST",
       body: JSON.stringify({ keyword }),
@@ -58,7 +59,7 @@ export const api = {
       body: JSON.stringify({ keywords }),
     }),
     delete: async (id: number) => fetchAPI(`/keywords/${id}`, { method: "DELETE" }),
-    generate: async () => fetchAPI("/keywords/generate", { method: "POST" }),
+    getAll: async () => fetchAPI("/keywords/all"),
   },
   
   settings: {
