@@ -5,6 +5,10 @@ import { UploadDropzone } from "@/components/upload/UploadDropzone"
 import { ParsedDataDisplay } from "@/components/resume/ParsedDataDisplay"
 import { KeywordInput } from "@/components/keywords/KeywordInput"
 import { SettingsWizard } from "@/components/settings/SettingsWizard"
+import { JobFilters, JobFiltersState } from "@/components/jobs/JobFilters"
+import { JobList } from "@/components/jobs/JobList"
+import { JobDetailModal } from "@/components/jobs/JobDetailModal"
+import { Job } from "@/components/jobs/JobCard"
 import { api } from "@/lib/api"
 
 interface Resume {
@@ -35,11 +39,27 @@ export default function Home() {
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showSetupWizard, setShowSetupWizard] = useState(true)
+  
+  // Job search state
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [viewMode, setViewMode] = useState<"reels" | "cards" | "table">("cards")
+  const [filters, setFilters] = useState<JobFiltersState>({
+    sources: [],
+    dateRange: "",
+    location: "",
+    minScore: 0,
+  })
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null)
+  const [searchKeywords, setSearchKeywords] = useState("")
+  const [searchLocation, setSearchLocation] = useState("")
+  const [isSearching, setIsSearching] = useState(false)
+  const [jobSources, setJobSources] = useState<string[]>([])
 
   useEffect(() => {
     loadResumes()
     loadKeywords()
     checkSettings()
+    loadJobSources()
   }, [])
 
   const checkSettings = async () => {
@@ -73,6 +93,68 @@ export default function Home() {
       setKeywords(data.map((k: { keyword: string }) => k.keyword))
     } catch (err) {
       console.error("Failed to load keywords:", err)
+    }
+  }
+
+  const loadJobSources = async () => {
+    try {
+      const settings = await api.settings.get()
+      setJobSources(settings.job_sources || [])
+    } catch (err) {
+      console.error("Failed to load job sources:", err)
+    }
+  }
+
+  const handleSearch = async () => {
+    setIsSearching(true)
+    try {
+      const results = await api.jobs.search(searchKeywords, searchLocation, filters.sources)
+      setJobs(results)
+      // Auto-score after search
+      if (results.length > 0) {
+        try {
+          await api.jobs.scoreAll(results.map((j: Job) => j.id))
+          const scored = await api.jobs.list()
+          setJobs(scored)
+        } catch (scoreErr) {
+          console.error("Failed to score jobs:", scoreErr)
+        }
+      }
+    } catch (err) {
+      console.error("Search failed:", err)
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  const handleFilterChange = async (newFilters: JobFiltersState) => {
+    setFilters(newFilters)
+    try {
+      const params: {
+        source?: string
+        location?: string
+        date_from?: string
+        sort?: string
+        min_score?: number
+      } = {}
+      
+      if (newFilters.sources.length > 0) {
+        params.source = newFilters.sources.join(",")
+      }
+      if (newFilters.location) {
+        params.location = newFilters.location
+      }
+      if (newFilters.dateRange) {
+        params.date_from = newFilters.dateRange
+      }
+      if (newFilters.minScore > 0) {
+        params.min_score = newFilters.minScore
+      }
+      
+      const results = await api.jobs.list(params)
+      setJobs(results)
+    } catch (err) {
+      console.error("Filter failed:", err)
     }
   }
 
@@ -254,9 +336,57 @@ export default function Home() {
                 onRemove={handleRemoveKeyword}
               />
             </section>
+
+            {/* Job Search Section */}
+            <section className="p-6 bg-white rounded-lg shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">Job Search</h2>
+              
+              {/* Search Bar */}
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  value={searchKeywords}
+                  onChange={(e) => setSearchKeywords(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  placeholder="Job title or keywords"
+                  className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50"
+                />
+                <input
+                  type="text"
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  placeholder="Location"
+                  className="w-32 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50"
+                />
+                <button
+                  onClick={handleSearch}
+                  disabled={isSearching}
+                  className="px-4 py-2 text-sm bg-[var(--accent)] text-white rounded-lg hover:opacity-90 disabled:opacity-50"
+                >
+                  {isSearching ? "Searching..." : "Search"}
+                </button>
+              </div>
+
+              {/* Job List */}
+              <JobList
+                jobs={jobs}
+                viewMode={viewMode}
+                onJobClick={setSelectedJob}
+                loading={isSearching}
+              />
+            </section>
           </div>
 
           <div className="space-y-6">
+            {/* Job Filters Sidebar */}
+            <JobFilters
+              onFilterChange={handleFilterChange}
+              jobSources={jobSources}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
+
             <section className="p-6 bg-white rounded-lg shadow-sm">
               <h2 className="text-lg font-semibold mb-4">Your Resumes</h2>
               {resumes.length > 0 ? (
@@ -317,6 +447,12 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        <JobDetailModal
+          job={selectedJob}
+          isOpen={!!selectedJob}
+          onClose={() => setSelectedJob(null)}
+        />
       </div>
     </main>
   )
