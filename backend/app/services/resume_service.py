@@ -6,7 +6,7 @@ import aiofiles
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 
-from app.models.models import Resume, User, Keyword, UserSettings, Application
+from app.models import Application, Keyword, Resume, User, UserSettings
 from app.services.parse_service import resume_parser_service
 
 

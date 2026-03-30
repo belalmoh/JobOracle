@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 import pandas as pd
 
-from app.models.models import Job, Keyword, UserSettings
+from app.models import Job, Keyword, UserSettings
 
 
 JOBSPY_SOURCES = {

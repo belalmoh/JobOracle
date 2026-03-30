@@ -1,10 +1,13 @@
 .PHONY: dev backend frontend install setup
 
+pythonvenv: 
+	cd backend && source .venv/bin/activate
+
 # Default target
-dev: backend frontend
+dev: pythonvenv backend frontend
 
 # Backend commands
-backend:
+backend: pythonvenv
 	cd backend && uvicorn app.main:app --reload --port 8000
 
 # Frontend commands

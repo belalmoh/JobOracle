@@ -46,3 +46,5 @@ next-env.d.ts
 __pycache__
 *.pyc
 *.db
+backend/joboracle.db
+backend/resumes/*
