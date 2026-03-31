@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation"
+import { CinematicScroll } from "@/components/landing"
 
 export default function HomePage() {
-  redirect("/dashboard")
+  return <CinematicScroll />
 }
