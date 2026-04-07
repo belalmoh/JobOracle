@@ -40,3 +40,7 @@ async def health_check():
         "database": db_info["database_type"],
         "fallback": db_info["is_fallback"],
     }
+
+if __name__ == "__main__":
+  import uvicorn
+  uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
