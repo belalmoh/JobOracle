@@ -34,11 +34,12 @@ interface ResumeSilhouetteProps {
   data: ResumeData;
   className?: string;
   variant?: "full" | "skeleton";
+  isAnimated?: boolean;
 }
 
-export function ResumeSilhouette({ data, className, variant = "full" }: ResumeSilhouetteProps) {
+export function ResumeSilhouette({ data, className, variant = "full", isAnimated = false }: ResumeSilhouetteProps) {
   if (variant === "skeleton") {
-    return <ResumeSkeleton className={className} />;
+    return <ResumeSkeleton className={className} isAnimated={isAnimated} />;
   }
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -300,73 +301,89 @@ function MiniSilhouette() {
   );
 }
 
-function ResumeSkeleton({ className }: { className?: string }) {
+function ResumeSkeleton({ className, isAnimated = false }: { className?: string; isAnimated?: boolean }) {
+  const bgClass = isAnimated
+    ? "bg-gradient-to-br from-pink-50 via-purple-50 to-fuchsia-50"
+    : "bg-zinc-100";
+
+  const avatarClass = isAnimated
+    ? "bg-gradient-to-br from-pink-300 via-purple-300 to-fuchsia-300"
+    : "bg-zinc-300";
+
+  const barClass = isAnimated
+    ? "bg-gradient-to-r from-pink-200 via-purple-200 to-fuchsia-200"
+    : "bg-zinc-200";
+
+  const dotClass = isAnimated
+    ? "bg-gradient-to-br from-pink-400 to-purple-400"
+    : "bg-zinc-400";
+
   return (
-    <div className={cn("min-h-screen bg-white p-8 md:p-12", className)}>
+    <div className={cn("min-h-screen p-8 md:p-12", bgClass, className)}>
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="flex items-center gap-6">
-          <div className="w-24 h-24 rounded-full bg-zinc-200" />
+          <div className={cn("w-24 h-24 rounded-full", avatarClass)} />
           <div className="flex-1 space-y-3">
-            <div className="h-8 w-48 rounded bg-zinc-200" />
-            <div className="h-5 w-64 rounded bg-zinc-200" />
+            <div className={cn("h-8 w-48 rounded", barClass)} />
+            <div className={cn("h-5 w-64 rounded", barClass)} />
           </div>
         </div>
 
-        <div className="h-px bg-zinc-200" />
+        <div className={cn("h-px", barClass)} />
 
         <div className="space-y-2">
-          <div className="h-4 w-24 rounded bg-zinc-200" />
-          <div className="h-4 w-full rounded bg-zinc-200" />
-          <div className="h-4 w-11/12 rounded bg-zinc-200" />
+          <div className={cn("h-4 w-24 rounded", barClass)} />
+          <div className={cn("h-4 w-full rounded", barClass)} />
+          <div className={cn("h-4 w-11/12 rounded", barClass)} />
         </div>
 
         <div className="space-y-4">
-          <div className="h-5 w-32 rounded bg-zinc-200" />
+          <div className={cn("h-5 w-32 rounded", barClass)} />
           <div className="space-y-3">
             <div className="flex gap-4">
-              <div className="w-4 h-4 rounded-full bg-zinc-200 mt-1" />
+              <div className={cn("w-4 h-4 rounded-full mt-1", dotClass)} />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-40 rounded bg-zinc-200" />
-                <div className="h-4 w-56 rounded bg-zinc-200" />
-                <div className="h-4 w-full rounded bg-zinc-200" />
-                <div className="h-4 w-4/5 rounded bg-zinc-200" />
+                <div className={cn("h-4 w-40 rounded", barClass)} />
+                <div className={cn("h-4 w-56 rounded", barClass)} />
+                <div className={cn("h-4 w-full rounded", barClass)} />
+                <div className={cn("h-4 w-4/5 rounded", barClass)} />
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="w-4 h-4 rounded-full bg-zinc-200 mt-1" />
+              <div className={cn("w-4 h-4 rounded-full mt-1", dotClass)} />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-40 rounded bg-zinc-200" />
-                <div className="h-4 w-56 rounded bg-zinc-200" />
-                <div className="h-4 w-full rounded bg-zinc-200" />
-                <div className="h-4 w-3/5 rounded bg-zinc-200" />
+                <div className={cn("h-4 w-40 rounded", barClass)} />
+                <div className={cn("h-4 w-56 rounded", barClass)} />
+                <div className={cn("h-4 w-full rounded", barClass)} />
+                <div className={cn("h-4 w-3/5 rounded", barClass)} />
               </div>
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="h-5 w-32 rounded bg-zinc-200" />
+          <div className={cn("h-5 w-32 rounded", barClass)} />
           <div className="flex gap-4">
-            <div className="w-4 h-4 rounded-full bg-zinc-200 mt-1" />
+            <div className={cn("w-4 h-4 rounded-full mt-1", dotClass)} />
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-48 rounded bg-zinc-200" />
-              <div className="h-4 w-36 rounded bg-zinc-200" />
+              <div className={cn("h-4 w-48 rounded", barClass)} />
+              <div className={cn("h-4 w-36 rounded", barClass)} />
             </div>
           </div>
           <div className="flex gap-4">
-            <div className="w-4 h-4 rounded-full bg-zinc-200 mt-1" />
+            <div className={cn("w-4 h-4 rounded-full mt-1", dotClass)} />
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-48 rounded bg-zinc-200" />
-              <div className="h-4 w-36 rounded bg-zinc-200" />
+              <div className={cn("h-4 w-48 rounded", barClass)} />
+              <div className={cn("h-4 w-36 rounded", barClass)} />
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="h-5 w-24 rounded bg-zinc-200" />
+          <div className={cn("h-5 w-24 rounded", barClass)} />
           <div className="flex flex-wrap gap-2">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-8 w-24 rounded-full bg-zinc-200" />
+              <div key={i} className={cn("h-8 w-24 rounded-full", avatarClass)} />
             ))}
           </div>
         </div>
