@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { useScroll, useTransform, motion, useMotionValueEvent, MotionValue } from "framer-motion";
+import { useScroll, useTransform, motion, useMotionValueEvent } from "framer-motion";
 import { ResumeSilhouette, ResumeData } from "@/components/ui/resume-silhouettes";
 import { Brain, Lightbulb } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const sampleResume: ResumeData = {
   name: "Alexandra Chen",
@@ -96,8 +95,6 @@ export default function HomePage() {
     ["bg-zinc-600", "bg-gradient-to-r from-pink-500 via-purple-500 to-fuchsia-500"]
   );
 
-  const skeletonColorProgress = useTransform(scrollYProgress, [0.3, 0.7], [0, 1]);
-
   return (
     <div className="bg-zinc-950 min-h-screen">
       <div ref={containerRef} className="h-[250rem] relative">
@@ -132,9 +129,9 @@ export default function HomePage() {
 
               <div className="w-full p-2 md:p-6">
                 <div className="h-full w-full overflow-hidden rounded-2xl">
-                  <SkeletonWithScroll
+                  <ResumeWithHighlights 
                     data={sampleResume}
-                    colorProgress={skeletonColorProgress}
+                    scrollProgress={scrollProgress}
                   />
                 </div>
               </div>
@@ -303,82 +300,117 @@ export default function HomePage() {
   );
 }
 
-function SkeletonWithScroll({
+function ResumeWithHighlights({
   data,
-  colorProgress,
+  scrollProgress,
 }: {
   data: ResumeData;
-  colorProgress: MotionValue<number>;
+  scrollProgress: number;
 }) {
-  const surfaceColor = useTransform(colorProgress, [0.3, 0.7], ["#f4f4f5", "#fdf2f8"]);
-  const barColor = useTransform(colorProgress, [0.3, 0.7], ["#e4e4e7", "#e9d5ff"]);
-  const dotColor = useTransform(colorProgress, [0.3, 0.7], ["#a1a1aa", "#c084fc"]);
-  const chipColor = useTransform(colorProgress, [0.3, 0.7], ["#e4e4e7", "#f0abfc"]);
+  const showHighlight = scrollProgress > 0.5;
+
+  const bgClass = "bg-zinc-100";
+  const barClass = "bg-zinc-200";
+  const dotClass = "bg-zinc-400";
+  const chipClass = "bg-zinc-200";
 
   return (
-    <motion.div
-      className="min-h-[20rem] md:min-h-[25rem] p-6"
-      style={{ backgroundColor: surfaceColor }}
-    >
-      <div className="max-w-3xl mx-auto space-y-6 animate-pulse">
-        <div className="flex items-center gap-4">
-          <motion.div className="w-16 h-16 rounded-full" style={{ backgroundColor: chipColor }} />
-          <div className="flex-1 space-y-2">
-            <motion.div className="h-6 w-40 rounded" style={{ backgroundColor: barColor }} />
-            <motion.div className="h-4 w-52 rounded" style={{ backgroundColor: barColor }} />
+    <div className={"min-h-[20rem] md:min-h-[25rem] p-6 " + bgClass}>
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* Avatar Section with Highlight Box */}
+        <div className="relative py-4">
+          {showHighlight && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ 
+                opacity: [0.4, 1, 0.4],
+                scale: [0.98, 1.02, 0.98],
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="absolute -inset-4 border-4 border-green-500 rounded-lg bg-green-500/20 pointer-events-none"
+            />
+          )}
+          <div className="flex items-center gap-4">
+            <div className={"w-16 h-16 rounded-full " + chipClass} />
+            <div className="flex-1 space-y-2">
+              <div className={"h-6 w-40 rounded " + barClass} />
+              <div className={"h-4 w-52 rounded " + barClass} />
+            </div>
           </div>
         </div>
 
-        <motion.div className="h-px" style={{ backgroundColor: barColor }} />
+        <div className={"h-px " + barClass} />
 
         <div className="space-y-2">
-          <motion.div className="h-3 w-20 rounded" style={{ backgroundColor: barColor }} />
-          <motion.div className="h-3 w-full rounded" style={{ backgroundColor: barColor }} />
-          <motion.div className="h-3 w-11/12 rounded" style={{ backgroundColor: barColor }} />
+          <div className={"h-3 w-20 rounded " + barClass} />
+          <div className={"h-3 w-full rounded " + barClass} />
+          <div className={"h-3 w-11/12 rounded " + barClass} />
         </div>
 
         <div className="space-y-3">
-          <motion.div className="h-4 w-28 rounded" style={{ backgroundColor: barColor }} />
+          <div className={"h-4 w-28 rounded " + barClass} />
           <div className="space-y-2">
             <div className="flex gap-3">
-              <motion.div className="w-3 h-3 rounded-full mt-1" style={{ backgroundColor: dotColor }} />
+              <div className={"w-3 h-3 rounded-full mt-1 " + dotClass} />
               <div className="flex-1 space-y-1.5">
-                <motion.div className="h-3 w-32 rounded" style={{ backgroundColor: barColor }} />
-                <motion.div className="h-3 w-48 rounded" style={{ backgroundColor: barColor }} />
-                <motion.div className="h-3 w-full rounded" style={{ backgroundColor: barColor }} />
+                <div className={"h-3 w-32 rounded " + barClass} />
+                <div className={"h-3 w-48 rounded " + barClass} />
+                <div className={"h-3 w-full rounded " + barClass} />
               </div>
             </div>
             <div className="flex gap-3">
-              <motion.div className="w-3 h-3 rounded-full mt-1" style={{ backgroundColor: dotColor }} />
+              <div className={"w-3 h-3 rounded-full mt-1 " + dotClass} />
               <div className="flex-1 space-y-1.5">
-                <motion.div className="h-3 w-32 rounded" style={{ backgroundColor: barColor }} />
-                <motion.div className="h-3 w-44 rounded" style={{ backgroundColor: barColor }} />
-                <motion.div className="h-3 w-3/4 rounded" style={{ backgroundColor: barColor }} />
+                <div className={"h-3 w-32 rounded " + barClass} />
+                <div className={"h-3 w-44 rounded " + barClass} />
+                <div className={"h-3 w-3/4 rounded " + barClass} />
               </div>
             </div>
           </div>
         </div>
 
         <div className="space-y-3">
-          <motion.div className="h-4 w-24 rounded" style={{ backgroundColor: barColor }} />
+          <div className={"h-4 w-24 rounded " + barClass} />
           <div className="flex gap-3">
-            <motion.div className="w-3 h-3 rounded-full mt-1" style={{ backgroundColor: dotColor }} />
+            <div className={"w-3 h-3 rounded-full mt-1 " + dotClass} />
             <div className="flex-1 space-y-1.5">
-              <motion.div className="h-3 w-40 rounded" style={{ backgroundColor: barColor }} />
-              <motion.div className="h-3 w-32 rounded" style={{ backgroundColor: barColor }} />
+              <div className={"h-3 w-40 rounded " + barClass} />
+              <div className={"h-3 w-32 rounded " + barClass} />
             </div>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <motion.div className="h-4 w-20 rounded" style={{ backgroundColor: barColor }} />
+        {/* Skills Section with Highlight Box */}
+        <div className="relative space-y-3 py-4">
+          {showHighlight && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ 
+                opacity: [0.4, 1, 0.4],
+                scale: [0.98, 1.02, 0.98],
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.1 
+              }}
+              className="absolute -inset-4 border-4 border-green-500 rounded-lg bg-green-500/20 pointer-events-none"
+            />
+          )}
+          
+          <div className={"h-4 w-20 rounded " + barClass} />
           <div className="flex flex-wrap gap-2">
             {[...Array(6)].map((_, i) => (
-              <motion.div key={i} className="h-6 w-20 rounded-full" style={{ backgroundColor: chipColor }} />
+              <div key={i} className={"h-6 w-20 rounded-full " + chipClass} />
             ))}
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

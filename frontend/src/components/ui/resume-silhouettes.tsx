@@ -34,12 +34,12 @@ interface ResumeSilhouetteProps {
   data: ResumeData;
   className?: string;
   variant?: "full" | "skeleton";
-  isAnimated?: boolean;
+  highlightedSections?: ('avatar' | 'skills')[];
 }
 
-export function ResumeSilhouette({ data, className, variant = "full", isAnimated = false }: ResumeSilhouetteProps) {
+export function ResumeSilhouette({ data, className, variant = "full", highlightedSections = [] }: ResumeSilhouetteProps) {
   if (variant === "skeleton") {
-    return <ResumeSkeleton className={className} isAnimated={isAnimated} />;
+    return <ResumeSkeleton className={className} highlightedSections={highlightedSections} />;
   }
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -301,22 +301,29 @@ function MiniSilhouette() {
   );
 }
 
-function ResumeSkeleton({ className, isAnimated = false }: { className?: string; isAnimated?: boolean }) {
-  const bgClass = isAnimated
-    ? "bg-gradient-to-br from-pink-50 via-purple-50 to-fuchsia-50"
-    : "bg-zinc-100";
+function ResumeSkeleton({ 
+  className,
+  highlightedSections = []
+}: { 
+  className?: string;
+  highlightedSections?: ('avatar' | 'skills')[];
+}) {
+  const isAvatarHighlighted = highlightedSections.includes('avatar');
+  const isSkillsHighlighted = highlightedSections.includes('skills');
 
-  const avatarClass = isAnimated
-    ? "bg-gradient-to-br from-pink-300 via-purple-300 to-fuchsia-300"
+  const bgClass = "bg-zinc-100";
+
+  const avatarClass = isAvatarHighlighted
+    ? "bg-green-400 border-2 border-green-600"
     : "bg-zinc-300";
 
-  const barClass = isAnimated
-    ? "bg-gradient-to-r from-pink-200 via-purple-200 to-fuchsia-200"
-    : "bg-zinc-200";
+  const barClass = "bg-zinc-200";
 
-  const dotClass = isAnimated
-    ? "bg-gradient-to-br from-pink-400 to-purple-400"
-    : "bg-zinc-400";
+  const dotClass = "bg-zinc-400";
+
+  const skillBadgeClass = isSkillsHighlighted
+    ? "bg-green-400 border-2 border-green-600"
+    : "bg-zinc-200";
 
   return (
     <div className={cn("min-h-screen p-8 md:p-12", bgClass, className)}>
@@ -383,7 +390,7 @@ function ResumeSkeleton({ className, isAnimated = false }: { className?: string;
           <div className={cn("h-5 w-24 rounded", barClass)} />
           <div className="flex flex-wrap gap-2">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className={cn("h-8 w-24 rounded-full", avatarClass)} />
+              <div key={i} className={cn("h-8 w-24 rounded-full", skillBadgeClass)} />
             ))}
           </div>
         </div>
