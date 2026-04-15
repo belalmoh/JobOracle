@@ -1,17 +1,18 @@
 # Roadmap: JobOracle
 
 **Created:** 2026-03-26
-**Phases:** 5 | **Requirements:** 31 | **Mode:** Interactive
+**Phases:** 6 | **Requirements:** 31+ | **Mode:** Interactive
 
 ## Phase Overview
 
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
 | 1 | Project Setup + Resume | Upload and parse resumes, generate keywords | RES-01 to RES-07, SET-01 to SET-03 | 5 ✓ |
-| 2 | Job Search | Search multiple platforms, display and filter jobs | JOB-01 to JOB-08 | 8 |
-| 3 | Scoring + Tracking | Match resume to jobs, track applications, notify | SCO-01 to SCO-04, APP-01 to APP-05, NOT-01 to NOT-04, APL-01 to APL-02 | 11 |
-| 4 | Auto-Apply | Automate application submission via Playwright | AUTO-01 to AUTO-05 | 5 |
-| 5 | Polish | Error handling, performance, refinements | All | 2 |
+| 2 | Browser Extension | Auto-fill job forms, score matching, resume suggestions | NEW | TBD |
+| 3 | Job Search | Search multiple platforms, display and filter jobs | JOB-01 to JOB-08 | 8 ✓ |
+| 4 | Scoring + Tracking | Match resume to jobs, track applications, notify | SCO-01 to SCO-04, APP-01 to APP-05, NOT-01 to NOT-04, APL-01 to APL-02 | 11 |
+| 5 | Auto-Apply | Automate application submission via Playwright | AUTO-01 to AUTO-05 | 5 |
+| 6 | Polish | Error handling, performance, refinements | All | 2 |
 
 ## Phase Details
 
@@ -44,7 +45,30 @@
 
 ---
 
-### Phase 2: Job Search
+### Phase 2: Browser Extension
+
+**Goal:** Browser extension for auto-filling job forms, score matching with resume, suggesting enhancements, and generating tailored resumes for specific jobs.
+
+**Status:** Not Started
+
+**Requirements:**
+- EXT-01: Auto-fill forms on job sites (browser extension)
+- EXT-02: Score matching against user resume
+- EXT-03: Suggest resume enhancements for specific jobs
+- EXT-04: Generate tailored resume for job posting
+
+**Success Criteria:**
+1. Extension works on major job sites (LinkedIn, Indeed, etc.)
+2. Auto-fill populated from user resume data
+3. Match score calculated when viewing job
+4. Resume suggestions generated based on job requirements
+5. One-click tailored resume generation
+
+**Dependencies:** Phase 1 complete
+
+---
+
+### Phase 3: Job Search
 
 **Goal:** Implement multi-platform job search, display, and filtering.
 
@@ -71,13 +95,13 @@
 **Dependencies:** Phase 1 complete
 
 **Plans:**
-- [x] 02-01-PLAN.md — Backend: Job Search API & Integration (Complete)
-- [x] 02-02-PLAN.md — Backend: Job Scoring & Matching (Complete)
-- [x] 02-03-PLAN.md — Frontend: Job Search UI (Complete)
+- [x] 03-01-PLAN.md — Backend: Job Search API & Integration (Complete)
+- [x] 03-02-PLAN.md — Backend: Job Scoring & Matching (Complete)
+- [x] 03-03-PLAN.md — Frontend: Job Search UI (Complete)
 
 ---
 
-### Phase 3: Scoring + Application Tracking + Notifications
+### Phase 4: Scoring + Application Tracking + Notifications
 
 **Goal:** Implement resume-to-job matching, application tracking, and notifications.
 
@@ -105,11 +129,11 @@
 4. User can track status (Applied, Pending, Rejected, Interview)
 5. User receives notifications for new matching jobs
 
-**Dependencies:** Phase 1 + Phase 2 complete
+**Dependencies:** Phase 1 + Phase 3 complete
 
 ---
 
-### Phase 4: Auto-Apply
+### Phase 5: Auto-Apply
 
 **Goal:** Implement automated application submission using Playwright.
 
@@ -127,11 +151,11 @@
 4. Rate limiting prevents account bans
 5. User can stop auto-apply at any time
 
-**Dependencies:** Phase 1 + Phase 3 complete
+**Dependencies:** Phase 1 + Phase 4 complete
 
 ---
 
-### Phase 5: Polish
+### Phase 6: Polish
 
 **Goal:** Error handling, performance optimization, and refinements.
 
@@ -143,20 +167,21 @@
 2. Good performance (fast load times, responsive UI)
 3. Edge cases handled (empty states, large datasets)
 
-**Dependencies:** Phase 1-4 complete
+**Dependencies:** Phase 1-5 complete
 
 ---
 
 ## Traceability
 
-All 31 v1 requirements mapped to phases above.
+All v1 requirements mapped to phases above.
 
 ## Notes
 
-- Phase 5 is about polish/refinement - no new requirements
+- Phase 2 (Browser Extension) added 2026-04-15
+- Phase 6 is about polish/refinement - no new requirements
 - Auto-apply is complex - may need iteration
 - Notifications can be basic in v1, enhance in future
 
 ---
 *Created: 2026-03-26*
-*Last updated: 2026-03-26 after roadmap creation*
+*Last updated: 2026-04-15 after milestone restructure*
