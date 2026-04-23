@@ -1,6 +1,4 @@
-// Greenhouse-specific detection logic
-
-import type { JobData } from '~types'
+import type { JobData } from '../types';
 
 export class GreenhouseDetector {
 

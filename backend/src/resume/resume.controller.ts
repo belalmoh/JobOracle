@@ -3,21 +3,39 @@ import {
 	Get,
 	Post,
 	Body,
-	Patch,
 	Param,
 	Delete,
+	UploadedFile,
+	UseInterceptors,
+	BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ResumeService } from './resume.service';
 import { CreateResumeDto } from './dto/create-resume.dto';
-import { UpdateResumeDto } from './dto/update-resume.dto';
+
+export interface UploadedFileMeta {
+	fieldname: string;
+	originalname: string;
+	encoding: string;
+	mimetype: string;
+	size: number;
+	destination: string;
+	filename: string;
+	path: string;
+	buffer: Buffer;
+}
 
 @Controller('resume')
 export class ResumeController {
 	constructor(private readonly resumeService: ResumeService) {}
 
-	@Post()
-	create(@Body() createResumeDto: CreateResumeDto) {
-		return this.resumeService.create(createResumeDto);
+	@Post('upload')
+	@UseInterceptors(FileInterceptor('file'))
+	create(@UploadedFile() file: UploadedFileMeta) {
+		if (!file) {
+			throw new BadRequestException('Resume file is required');
+		}
+		return this.resumeService.create(file);
 	}
 
 	@Get()
@@ -28,11 +46,6 @@ export class ResumeController {
 	@Get(':id')
 	findOne(@Param('id') id: string) {
 		return this.resumeService.findOne(+id);
-	}
-
-	@Patch(':id')
-	update(@Param('id') id: string, @Body() updateResumeDto: UpdateResumeDto) {
-		return this.resumeService.update(+id, updateResumeDto);
 	}
 
 	@Delete(':id')

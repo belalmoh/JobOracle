@@ -3,9 +3,22 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ResumeModule } from './resume/resume.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-	imports: [ResumeModule, ConfigModule.forRoot()],
+	imports: [
+		ResumeModule,
+		ConfigModule.forRoot(),
+		TypeOrmModule.forRootAsync({
+			useFactory: () => ({
+				type: 'better-sqlite3',
+				database: 'test.sqlite',
+				autoLoadEntities: true,
+				entities: [__dirname + '/**/*.entity{.ts,.js}'],
+				synchronize: false,
+			}),
+		}),
+	],
 	controllers: [AppController],
 	providers: [AppService],
 })
