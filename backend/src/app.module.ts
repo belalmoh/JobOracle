@@ -11,7 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 		ConfigModule.forRoot(),
 		TypeOrmModule.forRootAsync({
 			useFactory: () => ({
-				type: 'better-sqlite3',
+				type: 'sqlite',
 				database: 'test.sqlite',
 				autoLoadEntities: true,
 				entities: [__dirname + '/**/*.entity{.ts,.js}'],
