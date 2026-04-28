@@ -8,7 +8,7 @@ const DEFAULT_SETTINGS: ExtensionSettings = {
     autoDetectForms: true,
     showFloatingButton: true,
     smartFieldMatching: true,
-    backendUrl: "http://localhost:3000",
+    backendUrl: "http://localhost:3000/api",
 };
 
 export async function getSettings(): Promise<ExtensionSettings> {
@@ -38,17 +38,14 @@ export async function setCurrentJob(job: JobData | null): Promise<void> {
 
 export async function uploadResume(
     file: File,
-    jobData: JobData,
+    ownerId: string,
 ): Promise<MatchScoreResponse> {
     const settings = await getSettings();
     const formData = new FormData();
     formData.append("resume", file);
-    formData.append("jobTitle", jobData.title);
-    formData.append("company", jobData.company);
-    formData.append("jobDescription", jobData.description);
-    if (jobData.location) formData.append("location", jobData.location);
+    formData.append("ownerId", ownerId);
 
-    const response = await fetch(`${settings.backendUrl}/resume`, {
+    const response = await fetch(`${settings.backendUrl}/resume/upload`, {
         method: "POST",
         body: formData,
     });

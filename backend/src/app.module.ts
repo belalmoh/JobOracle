@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ResumeModule } from './resume/resume.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ResponseInterceptor } from './common/interceptors/response/response.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core/constants';
 
 @Module({
 	imports: [
@@ -15,11 +17,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 				database: 'test.sqlite',
 				autoLoadEntities: true,
 				entities: [__dirname + '/**/*.entity{.ts,.js}'],
-				synchronize: false,
+				synchronize: true,
+				logging: true,
 			}),
 		}),
 	],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [
+		AppService,
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: ResponseInterceptor,
+		},
+	],
 })
 export class AppModule {}

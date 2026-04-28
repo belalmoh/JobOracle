@@ -8,6 +8,7 @@ import {
 	UploadedFile,
 	UseInterceptors,
 	BadRequestException,
+	ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResumeService } from './resume.service';
@@ -30,12 +31,12 @@ export class ResumeController {
 	constructor(private readonly resumeService: ResumeService) {}
 
 	@Post('upload')
-	@UseInterceptors(FileInterceptor('file'))
-	create(@UploadedFile() file: UploadedFileMeta) {
+	@UseInterceptors(FileInterceptor('resume'))
+	create(@UploadedFile() file: any, @Body('ownerId') ownerId: string) {
 		if (!file) {
 			throw new BadRequestException('Resume file is required');
 		}
-		return this.resumeService.create(file);
+		return this.resumeService.create(file, ownerId);
 	}
 
 	@Get()
@@ -44,12 +45,17 @@ export class ResumeController {
 	}
 
 	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return this.resumeService.findOne(+id);
+	findOne(@Param('id', ParseIntPipe) id: number) {
+		return this.resumeService.findOne(id);
 	}
 
 	@Delete(':id')
-	remove(@Param('id') id: string) {
-		return this.resumeService.remove(+id);
+	remove(@Param('id', ParseIntPipe) id: number) {
+		return this.resumeService.remove(id);
+	}
+
+	@Delete()
+	removeAll() {
+		return this.resumeService.removeAll();
 	}
 }

@@ -2,4 +2,5 @@ allowBuilds:
   '@nestjs/core': false
   better-sqlite3: false
   sqlite3: true
+  tesseract.js: true
   unrs-resolver: false

@@ -1,15 +1,12 @@
-import {
-	Entity,
-	Column,
-	PrimaryGeneratedColumn,
-	CreateDateColumn,
-	UpdateDateColumn,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('resumes')
 export class Resume {
 	@PrimaryGeneratedColumn()
 	id!: number;
+
+	@Column()
+	ownerId!: string;
 
 	@Column()
 	name!: string;

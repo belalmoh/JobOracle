@@ -48,3 +48,5 @@ __pycache__
 *.db
 backend/joboracle.db
 backend/resumes/*
+
+*.sqlite
