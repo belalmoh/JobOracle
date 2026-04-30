@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Header } from "@/components/Header";
 import { JobCard } from "@/components/JobCard";
 import { ResumeUpload } from "@/components/ResumeUpload";
@@ -15,6 +16,35 @@ export default function App() {
             resumeScore.upload(file, uuid);
         }
     };
+
+    const handleAnalyze = () => {
+        if (!job || !uuid || !resumeScore.resumeData?.id) return;
+        resumeScore.analyze(
+            job,
+            resumeScore.resumeData.id,
+            uuid,
+            resumeScore.resumeData.content,
+        );
+    };
+
+    useEffect(() => {
+        if (
+            resumeScore.uploadState === "success" &&
+            resumeScore.resumeData?.id &&
+            !resumeScore.score &&
+            !resumeScore.isAnalyzing &&
+            !resumeScore.analyzedRef.current &&
+            job &&
+            uuid
+        ) {
+            resumeScore.analyze(
+                job,
+                resumeScore.resumeData.id,
+                uuid,
+                resumeScore.resumeData.content,
+            );
+        }
+    }, [resumeScore.uploadState, resumeScore.resumeData]);
 
     return (
         <div className="flex flex-col h-screen w-[450px] max-h-[550px] bg-background overflow-hidden">
@@ -34,6 +64,8 @@ export default function App() {
                             error={resumeScore.error}
                             onUpload={handleUpload}
                             onReset={resumeScore.reset}
+                            onAnalyze={handleAnalyze}
+                            analyzing={resumeScore.isAnalyzing}
                             disabled={!job}
                         />
                         {resumeScore.score && (

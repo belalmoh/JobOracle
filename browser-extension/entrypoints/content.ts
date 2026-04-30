@@ -9,14 +9,15 @@ const POPUP_ID = "joboracle-popup";
 export default defineContentScript({
     matches: [
         "*://*.greenhouse.io/*",
-        "*://boards.greenhouse.io/*",
-        "*://job-boards.greenhouse.io/*",
         "*://*.lever.co/*",
-        "*://jobs.lever.co/*",
         "*://*.workday.com/*",
         "*://*.myworkdayjobs.com/*",
     ],
     main() {
+        // Guard against double-injection (WXT HMR, overlapping matches, etc.)
+        if ((document as any).__jobOracleLoaded) return;
+        (document as any).__jobOracleLoaded = true;
+
         let popupOpen = false;
 
         function injectStyles() {
@@ -236,12 +237,15 @@ export default defineContentScript({
             popupOpen = false;
         }
 
-        function detectAndSendJob() {
+        async function detectAndSendJob() {
             let jobData: JobData | null = null;
 
             const url = window.location.href;
-            if (/greenhouse\.io/.test(url)) {
-                jobData = GreenhouseDetector.extractJobData();
+
+            const greenhouseDetector = new GreenhouseDetector();
+
+            if (greenhouseDetector.isJobApplicationPage()) {
+                jobData = await greenhouseDetector.extractJobData();
             }
 
             if (jobData) {

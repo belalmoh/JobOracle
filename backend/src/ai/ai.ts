@@ -17,20 +17,26 @@ export class AiProvider {
 		});
 	}
 
-	async chat(messages: ChatMessage[]) {
-		const response = await this.client.chat.completions.create({
-			model: 'gemma3:4b-cloud',
-			messages: messages.map((msg) => ({
-				role: msg.role,
-				content: msg.content,
-			})),
-		});
-		return response.choices[0].message.content;
+	async chat(messages: ChatMessage[], model = 'gemma3:4b-cloud', temperature?: number) {
+		try {
+			const response = await this.client.chat.completions.create({
+				model,
+				messages: messages.map((msg) => ({
+					role: msg.role,
+					content: msg.content,
+				})),
+				...(temperature !== undefined && { temperature }),
+			});
+			return response.choices[0].message.content;
+		} catch (error) {
+			console.error('Error communicating with AI provider:', error);
+			throw new Error('Failed to get response from AI provider');
+		}
 	}
 
-	async *stream(messages: ChatMessage[]) {
+	async *stream(messages: ChatMessage[], model = 'gemma3:4b-cloud') {
 		const response = await this.client.chat.completions.create({
-			model: 'gemma3:4b-cloud',
+			model,
 			messages: messages.map((msg) => ({
 				role: msg.role,
 				content: msg.content,

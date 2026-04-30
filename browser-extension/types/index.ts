@@ -39,6 +39,39 @@ export interface UserProfile {
     keywords: string[];
 }
 
+export interface ResumeDataContent {
+    content: {
+        certifications: string[];
+        education: Array<{
+            degree: string;
+            school: string;
+            dates: string;
+            details: string;
+        }>;
+        experience: Array<{
+            title: string;
+            company: string;
+            dates: string;
+            description: string;
+        }>;
+        github?: string;
+        linkedin?: string;
+        location?: string;
+        name?: string;
+        phone?: string;
+        skills: string[];
+        summary?: string;
+        website?: string;
+    };
+}
+
+export interface ResumeData {
+    id: number;
+    name: string;
+    ownerId: string;
+    content: ResumeDataContent;
+}
+
 // Job Data (extracted from page)
 export interface JobData {
     company: string;
@@ -125,13 +158,41 @@ export interface FieldMapping {
     type: FieldType;
 }
 
-// API Response Types
-export interface MatchScoreResponse {
-    score: number;
-    explanation?: string;
+// Job Analysis API Response
+export interface JobAnalysisInsights {
+    strengths: string;
+    gaps: string;
+    keywords: string[];
+}
+
+export interface JobAnalysisResponse {
+    success: boolean;
+    data: {
+        matchScore: number;
+        skillAlignment: number;
+        experienceMatch: number;
+        keywordCoverage: number;
+        matchingSkills: string[];
+        missingSkills: string[];
+        recommendations: string[];
+        insights: JobAnalysisInsights;
+    };
+    timestamp: string;
 }
 
 export interface FieldCategorizationResponse {
     field: string;
     confidence: number;
+}
+
+export interface ResumeAnalysisData {
+    resumeId: number;
+    ownerId: string;
+    resumeData: ResumeDataContent;
+    companyName: string;
+    description: string;
+    location?: string;
+    salary?: number;
+    title: string;
+    url: string;
 }

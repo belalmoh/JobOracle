@@ -14,3 +14,17 @@ export function getBrowserId() {
     }
     return id;
 }
+
+export function stripGreenhouseContent(raw: string): string {
+    return raw
+        .replace(/^"|"$/g, "")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&amp;/g, "&")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, " ")
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}

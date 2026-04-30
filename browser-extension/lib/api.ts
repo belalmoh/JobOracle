@@ -1,4 +1,10 @@
-import type { JobData, ExtensionSettings, MatchScoreResponse } from "@/types";
+import type {
+    JobData,
+    ExtensionSettings,
+    ResumeData,
+    ResumeAnalysisData,
+    JobAnalysisResponse,
+} from "@/types";
 
 const DEFAULT_SETTINGS: ExtensionSettings = {
     theme: "system",
@@ -39,7 +45,7 @@ export async function setCurrentJob(job: JobData | null): Promise<void> {
 export async function uploadResume(
     file: File,
     ownerId: string,
-): Promise<MatchScoreResponse> {
+): Promise<{ data: ResumeData }> {
     const settings = await getSettings();
     const formData = new FormData();
     formData.append("resume", file);
@@ -59,21 +65,20 @@ export async function uploadResume(
     return response.json();
 }
 
-export async function getMatchScore(
-    resumeId: number,
-    jobData: JobData,
-): Promise<MatchScoreResponse> {
+export async function getResumeAnalysis(
+    resumeAnalysisData: ResumeAnalysisData,
+): Promise<JobAnalysisResponse> {
     const settings = await getSettings();
-    const params = new URLSearchParams({
-        jobTitle: jobData.title,
-        company: jobData.company,
-        jobDescription: jobData.description,
-    });
-    if (jobData.location) params.append("location", jobData.location);
 
-    const response = await fetch(
-        `${settings.backendUrl}/resume/${resumeId}/match?${params.toString()}`,
-    );
+    const response = await fetch(`${settings.backendUrl}/job/analyze`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            ...resumeAnalysisData,
+        }),
+    });
 
     if (!response.ok) {
         throw new Error(

@@ -40,7 +40,9 @@ export class ResumeService {
 			ownerId: ownerId,
 		});
 
-		return this.resumeRepository.save(resume);
+		const created = await this.resumeRepository.save(resume);
+
+		return created;
 	}
 
 	findAll() {

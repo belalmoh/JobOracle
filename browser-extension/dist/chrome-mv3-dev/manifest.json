@@ -46,10 +46,7 @@
   },
   "host_permissions": [
     "*://*.greenhouse.io/*",
-    "*://boards.greenhouse.io/*",
-    "*://job-boards.greenhouse.io/*",
     "*://*.lever.co/*",
-    "*://jobs.lever.co/*",
     "*://*.workday.com/*",
     "*://*.myworkdayjobs.com/*",
     "http://localhost/*"
