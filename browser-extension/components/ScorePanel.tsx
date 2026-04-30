@@ -2,7 +2,7 @@ import type { JobAnalysisResponse } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, Lightbulb, ChartPieSlice, ArrowRight } from '@phosphor-icons/react';
+import { CheckCircle, XCircle, ChartPieSlice, ArrowRight } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface ScorePanelProps {
@@ -72,6 +72,11 @@ function ScoreLabel({ label, value }: { label: string; value: number }) {
     );
 }
 
+function parseSentences(text: string): string[] {
+    if (!text?.trim()) return [];
+    return text.split(/(?<=[.!?])\s+/).filter(Boolean);
+}
+
 export function ScorePanel({ score }: ScorePanelProps) {
     const data = score.data;
     const matchScore = data.matchScore;
@@ -81,6 +86,9 @@ export function ScorePanel({ score }: ScorePanelProps) {
         { label: 'Experience Match', value: Math.round(data.experienceMatch * 100) },
         { label: 'Keyword Coverage', value: Math.round(data.keywordCoverage * 100) },
     ];
+
+    const strengthsSentences = parseSentences(data.insights.strengths);
+    const gapsSentences = parseSentences(data.insights.gaps);
 
     return (
         <div className="space-y-4">
@@ -182,11 +190,11 @@ export function ScorePanel({ score }: ScorePanelProps) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
-                    <ul className="space-y-1.5">
-                        {data.insights.strengths.split('. ').map((sentence, i, arr) => (
-                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                    <ul className="space-y-2">
+                        {strengthsSentences.map((sentence, i) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
                                 <span className="text-teal-500 mt-0.5">•</span>
-                                <span>{sentence.trim()}{!arr[i].endsWith('.') && '.'}</span>
+                                <span>{sentence}</span>
                             </li>
                         ))}
                     </ul>
@@ -201,11 +209,11 @@ export function ScorePanel({ score }: ScorePanelProps) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
-                    <ul className="space-y-1.5">
-                        {data.insights.gaps.split('. ').map((sentence, i, arr) => (
-                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                    <ul className="space-y-2">
+                        {gapsSentences.map((sentence, i) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
                                 <span className="text-orange-500 mt-0.5">•</span>
-                                <span>{sentence.trim()}{!arr[i].endsWith('.') && '.'}</span>
+                                <span>{sentence}</span>
                             </li>
                         ))}
                     </ul>

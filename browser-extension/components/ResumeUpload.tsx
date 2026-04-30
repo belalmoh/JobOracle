@@ -130,7 +130,7 @@ export function ResumeUpload({
                     </div>
                 )}
 
-                {uploadState !== "idle" && file && (
+                {uploadState !== "idle" && (
                     <div className="space-y-3">
                         <div className="flex items-center gap-2 rounded-lg bg-muted/50 p-3">
                             <FileText
@@ -139,7 +139,7 @@ export function ResumeUpload({
                                 className="text-primary shrink-0"
                             />
                             <span className="text-xs font-medium truncate flex-1">
-                                {file.name}
+                                {file ? file.name : "Resume uploaded"}
                             </span>
                             {onAnalyze && uploadState === "success" && (
                                 <Button
@@ -147,7 +147,7 @@ export function ResumeUpload({
                                     size="sm"
                                     className="h-6 text-xs gap-1 shrink-0 cursor-pointer"
                                     onClick={onAnalyze}
-                                    disabled={analyzing}
+                                    disabled={analyzing || disabled}
                                 >
                                     {analyzing ? (
                                         <Spinner

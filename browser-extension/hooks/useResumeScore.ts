@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import type {
     JobAnalysisResponse,
     ResumeData,
@@ -16,7 +16,27 @@ export function useResumeScore() {
     const [score, setScore] = useState<JobAnalysisResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [initialized, setInitialized] = useState(false);
     const analyzedRef = useRef(false);
+
+    useEffect(() => {
+        browser.storage.local
+            .get(["resumeData", "analysisScore"])
+            .then((result: Record<string, any>) => {
+                if (result.analysisScore) {
+                    setScore(result.analysisScore as JobAnalysisResponse);
+                    setUploadState("success");
+                }
+                if (result.resumeData) {
+                    setResumeData(result.resumeData as ResumeData);
+                    setUploadState("success");
+                }
+                setInitialized(true);
+            })
+            .catch(() => {
+                setInitialized(true);
+            });
+    }, []);
 
     const handleResumeAnalysis = useCallback(
         async (
@@ -40,6 +60,7 @@ export function useResumeScore() {
                     url: jobData.url,
                 });
                 setScore(result);
+                browser.storage.local.set({ analysisScore: result });
             } catch (err) {
                 const message =
                     err instanceof Error ? err.message : "Analysis failed";
@@ -83,6 +104,7 @@ export function useResumeScore() {
         setError(null);
         setIsAnalyzing(false);
         analyzedRef.current = false;
+        browser.storage.local.remove(["resumeData", "analysisScore"]);
     }, []);
 
     return {
@@ -93,6 +115,7 @@ export function useResumeScore() {
         error,
         isAnalyzing,
         analyzedRef,
+        initialized,
         upload: handleUpload,
         reset,
         analyze: handleResumeAnalysis,

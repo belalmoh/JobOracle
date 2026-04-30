@@ -25,17 +25,4 @@ export default defineBackground(() => {
 
         return false;
     });
-
-    // browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    //     if (changeInfo.status === "complete" && tab.url) {
-    //         const url: string = tab.url;
-    //         const jobPagePatterns = [/greenhouse\.io/, /lever\.co/, /workday/];
-    //         const isJobPage = jobPagePatterns.some((p) => p.test(url));
-    //         if (isJobPage) {
-    //             browser.tabs
-    //                 .sendMessage(tabId, { type: "CHECK_FOR_JOB" })
-    //                 .catch(() => {});
-    //         }
-    //     }
-    // });
 });

@@ -111,11 +111,10 @@ export default defineContentScript({
         }
         #${POPUP_ID} {
           position: fixed;
-          top: 50%;
-          transform: translateY(-50%);
           z-index: 2147483646;
           width: 450px;
-          height: 550px;
+          max-height: calc(100vh - 32px);
+          height: 600px;
           border: none;
           border-radius: 16px;
           overflow: hidden;
@@ -131,8 +130,8 @@ export default defineContentScript({
           animation: jobOracleOverlayIn 0.2s ease both;
         }
         @keyframes jobOraclePopupIn {
-          from { opacity: 0; transform: translateY(-50%) scale(0.95); }
-          to { opacity: 1; transform: translateY(-50%) scale(1); }
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
         }
         @keyframes jobOracleOverlayIn {
           from { opacity: 0; }
@@ -145,8 +144,8 @@ export default defineContentScript({
           animation: jobOracleOverlayOut 0.15s ease both !important;
         }
         @keyframes jobOraclePopupOut {
-          from { opacity: 1; transform: translateY(-50%) scale(1); }
-          to { opacity: 0; transform: translateY(-50%) scale(0.95); }
+          from { opacity: 1; transform: scale(1); }
+          to { opacity: 0; transform: scale(0.95); }
         }
         @keyframes jobOracleOverlayOut {
           from { opacity: 1; }
@@ -207,11 +206,18 @@ export default defineContentScript({
             document.body.appendChild(overlay);
 
             const wrapperY = getWrapperY();
+            const popupHeight = Math.min(600, window.innerHeight - 32);
+            // Position popup so it stays within viewport
+            let top = wrapperY - popupHeight / 2;
+            if (top < 16) top = 16;
+            if (top + popupHeight > window.innerHeight - 16)
+                top = window.innerHeight - 16 - popupHeight;
+
             const iframe = document.createElement("iframe");
             iframe.id = POPUP_ID;
             iframe.src = browser.runtime.getURL("/popup.html");
             iframe.allow = "clipboard-write";
-            iframe.style.top = `${wrapperY}px`;
+            iframe.style.top = `${top}px`;
             iframe.style.right = "68px";
             document.body.appendChild(iframe);
             popupOpen = true;
