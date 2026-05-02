@@ -13,6 +13,7 @@ const DEFAULT_SETTINGS: ExtensionSettings = {
     ollamaModel: "llama3",
     autoDetectForms: true,
     showFloatingButton: true,
+    autoOpenSidebar: true,
     smartFieldMatching: true,
     backendUrl: "http://localhost:3000/api",
 };

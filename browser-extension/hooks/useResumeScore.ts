@@ -96,6 +96,26 @@ export function useResumeScore() {
         [],
     );
 
+    const retryUpload = useCallback(
+        async (ownerId: string) => {
+            if (!file) return;
+            setUploadState("uploading");
+            setError(null);
+            try {
+                const result = await uploadResume(file, ownerId);
+                setResumeData(result.data as ResumeData);
+                browser.storage.local.set({ resumeData: result.data });
+                setUploadState("success");
+            } catch (err) {
+                const message =
+                    err instanceof Error ? err.message : "Upload failed";
+                setError(message);
+                setUploadState("error");
+            }
+        },
+        [file],
+    );
+
     const reset = useCallback(() => {
         setFile(null);
         setUploadState("idle");
@@ -117,6 +137,7 @@ export function useResumeScore() {
         analyzedRef,
         initialized,
         upload: handleUpload,
+        retryUpload,
         reset,
         analyze: handleResumeAnalysis,
     };

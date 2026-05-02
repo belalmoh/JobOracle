@@ -7,10 +7,10 @@ export default defineConfig({
     manifest: {
         name: "JobOracle",
         description: "AI-powered job application assistant",
-        permissions: ["storage", "activeTab", "sidePanel"],
+        permissions: ["storage", "activeTab"],
         web_accessible_resources: [
             {
-                resources: ["popup.html", "chunks/*", "assets/*"],
+                resources: ["settings.html", "chunks/*", "assets/*"],
                 matches: ["<all_urls>"],
             },
         ],

@@ -7,6 +7,7 @@ import {
     Trash,
     Spinner,
     ChartPieSlice,
+    ArrowClockwise,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ interface ResumeUploadProps {
     onUpload: (file: File) => void;
     onReset: () => void;
     onAnalyze?: () => void;
+    onRetry?: () => void;
     analyzing?: boolean;
     disabled?: boolean;
 }
@@ -31,6 +33,7 @@ export function ResumeUpload({
     onUpload,
     onReset,
     onAnalyze,
+    onRetry,
     analyzing,
     disabled,
 }: ResumeUploadProps) {
@@ -161,6 +164,18 @@ export function ResumeUpload({
                                         />
                                     )}
                                     {analyzing ? "Analyzing..." : "Analyze"}
+                                </Button>
+                            )}
+                            {uploadState === "error" && onRetry && (
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="h-6 text-xs gap-1 shrink-0 cursor-pointer"
+                                    onClick={onRetry}
+                                    disabled={disabled}
+                                >
+                                    <ArrowClockwise size={12} weight="duotone" />
+                                    Retry
                                 </Button>
                             )}
                             {(uploadState === "success" ||

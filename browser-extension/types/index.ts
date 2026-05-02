@@ -110,6 +110,7 @@ export interface ExtensionSettings {
     apiKey?: string;
     autoDetectForms: boolean;
     showFloatingButton: boolean;
+    autoOpenSidebar: boolean;
     smartFieldMatching: boolean;
     backendUrl: string;
 }

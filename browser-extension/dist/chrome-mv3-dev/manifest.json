@@ -13,14 +13,13 @@
   "permissions": [
     "storage",
     "activeTab",
-    "sidePanel",
     "tabs",
     "scripting"
   ],
   "web_accessible_resources": [
     {
       "resources": [
-        "popup.html",
+        "settings.html",
         "chunks/*",
         "assets/*"
       ],
@@ -39,10 +38,6 @@
   },
   "background": {
     "service_worker": "background.js"
-  },
-  "action": {
-    "default_title": "JobOracle",
-    "default_popup": "popup.html"
   },
   "host_permissions": [
     "*://*.greenhouse.io/*",
