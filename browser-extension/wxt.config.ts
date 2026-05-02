@@ -8,6 +8,7 @@ export default defineConfig({
         name: "JobOracle",
         description: "AI-powered job application assistant",
         permissions: ["storage", "activeTab"],
+        action: {},
         web_accessible_resources: [
             {
                 resources: ["settings.html", "chunks/*", "assets/*"],

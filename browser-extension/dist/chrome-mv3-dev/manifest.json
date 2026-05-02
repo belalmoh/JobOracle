@@ -16,6 +16,7 @@
     "tabs",
     "scripting"
   ],
+  "action": {},
   "web_accessible_resources": [
     {
       "resources": [
