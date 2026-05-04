@@ -11,6 +11,7 @@ type UploadState = "idle" | "selected" | "uploading" | "success" | "error";
 
 export function useResumeScore() {
     const [file, setFile] = useState<File | null>(null);
+    const [fileInfo, setFileInfo] = useState<{ name: string; type: string; size: number } | null>(null);
     const [uploadState, setUploadState] = useState<UploadState>("idle");
     const [resumeData, setResumeData] = useState<ResumeData | null>(null);
     const [score, setScore] = useState<JobAnalysisResponse | null>(null);
@@ -21,15 +22,17 @@ export function useResumeScore() {
 
     useEffect(() => {
         browser.storage.local
-            .get(["resumeData", "analysisScore"])
+            .get(["resumeData", "analysisScore", "fileInfo"])
             .then((result: Record<string, any>) => {
                 if (result.analysisScore) {
                     setScore(result.analysisScore as JobAnalysisResponse);
-                    setUploadState("success");
                 }
                 if (result.resumeData) {
                     setResumeData(result.resumeData as ResumeData);
                     setUploadState("success");
+                }
+                if (result.fileInfo) {
+                    setFileInfo(result.fileInfo);
                 }
                 setInitialized(true);
             })
@@ -61,13 +64,14 @@ export function useResumeScore() {
                 });
                 setScore(result);
                 browser.storage.local.set({ analysisScore: result });
+                analyzedRef.current = true;
             } catch (err) {
                 const message =
                     err instanceof Error ? err.message : "Analysis failed";
                 setError(message);
+                analyzedRef.current = false;
             } finally {
                 setIsAnalyzing(false);
-                analyzedRef.current = true;
             }
         },
         [],
@@ -75,7 +79,9 @@ export function useResumeScore() {
 
     const handleUpload = useCallback(
         async (selectedFile: File, ownerId: string) => {
+            const info = { name: selectedFile.name, type: selectedFile.type, size: selectedFile.size };
             setFile(selectedFile);
+            setFileInfo(info);
             setUploadState("uploading");
             setError(null);
             setScore(null);
@@ -84,7 +90,7 @@ export function useResumeScore() {
             try {
                 const result = await uploadResume(selectedFile, ownerId);
                 setResumeData(result.data as ResumeData);
-                browser.storage.local.set({ resumeData: result.data });
+                browser.storage.local.set({ resumeData: result.data, fileInfo: info });
                 setUploadState("success");
             } catch (err) {
                 const message =
@@ -118,17 +124,19 @@ export function useResumeScore() {
 
     const reset = useCallback(() => {
         setFile(null);
+        setFileInfo(null);
         setUploadState("idle");
         setResumeData(null);
         setScore(null);
         setError(null);
         setIsAnalyzing(false);
         analyzedRef.current = false;
-        browser.storage.local.remove(["resumeData", "analysisScore"]);
+        browser.storage.local.remove(["resumeData", "analysisScore", "fileInfo"]);
     }, []);
 
     return {
         file,
+        fileInfo,
         uploadState,
         resumeData,
         score,

@@ -76,6 +76,7 @@ export function AppContent({ className }: AppContentProps) {
                     <ResumeUpload
                         uploadState={resumeScore.uploadState}
                         file={resumeScore.file}
+                        fileInfo={resumeScore.fileInfo}
                         error={resumeScore.error}
                         onUpload={handleUpload}
                         onReset={resumeScore.reset}
@@ -92,17 +93,18 @@ export function AppContent({ className }: AppContentProps) {
                 <>
                     {resumeScore.score ? (
                         <div className="space-y-3">
-                        <ResumeUpload
-                            uploadState={resumeScore.uploadState}
-                            file={resumeScore.file}
-                            error={resumeScore.error}
-                            onUpload={handleUpload}
-                            onReset={resumeScore.reset}
-                            onAnalyze={handleAnalyze}
-                            onRetry={handleRetry}
-                            analyzing={resumeScore.isAnalyzing}
-                            disabled={!job}
-                        />
+                            <ResumeUpload
+                                uploadState={resumeScore.uploadState}
+                                file={resumeScore.file}
+                                fileInfo={resumeScore.fileInfo}
+                                error={resumeScore.error}
+                                onUpload={handleUpload}
+                                onReset={resumeScore.reset}
+                                onAnalyze={handleAnalyze}
+                                onRetry={handleRetry}
+                                analyzing={resumeScore.isAnalyzing}
+                                disabled={!job}
+                            />
                             <ScorePanel score={resumeScore.score} />
                         </div>
                     ) : (

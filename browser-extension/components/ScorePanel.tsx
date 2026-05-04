@@ -1,9 +1,14 @@
-import type { JobAnalysisResponse } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, ChartPieSlice, ArrowRight } from '@phosphor-icons/react';
-import { cn } from '@/lib/utils';
+import type { JobAnalysisResponse } from "@/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+    CheckCircle,
+    XCircle,
+    ChartPieSlice,
+    ArrowRight,
+} from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 
 interface ScorePanelProps {
     score: JobAnalysisResponse;
@@ -17,20 +22,23 @@ function ScoreRing({ value, size = 72 }: { value: number; size?: number }) {
 
     const scoreColor =
         value >= 80
-            ? 'text-green-500'
+            ? "text-green-500"
             : value >= 60
-                ? 'text-yellow-500'
-                : 'text-red-500';
+              ? "text-yellow-500"
+              : "text-red-500";
 
     const strokeColor =
         value >= 80
-            ? 'stroke-green-500'
+            ? "stroke-green-500"
             : value >= 60
-                ? 'stroke-yellow-500'
-                : 'stroke-red-500';
+              ? "stroke-yellow-500"
+              : "stroke-red-500";
 
     return (
-        <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+        <div
+            className="relative inline-flex items-center justify-center"
+            style={{ width: size, height: size }}
+        >
             <svg width={size} height={size} className="-rotate-90">
                 <circle
                     cx={size / 2}
@@ -50,11 +58,13 @@ function ScoreRing({ value, size = 72 }: { value: number; size?: number }) {
                     strokeDasharray={circumference}
                     strokeDashoffset={offset}
                     strokeLinecap="round"
-                    className={cn('transition-all duration-700', strokeColor)}
+                    className={cn("transition-all duration-700", strokeColor)}
                 />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-                <span className={cn('text-lg font-bold', scoreColor)}>{value}%</span>
+                <span className={cn("text-lg font-bold", scoreColor)}>
+                    {value}%
+                </span>
             </div>
         </div>
     );
@@ -78,24 +88,36 @@ function parseSentences(text: string): string[] {
 }
 
 export function ScorePanel({ score }: ScorePanelProps) {
-    const data = score.data;
-    const matchScore = data.matchScore;
+    const matchScore = score.matchScore;
 
     const subScores = [
-        { label: 'Skill Alignment', value: Math.round(data.skillAlignment * 100) },
-        { label: 'Experience Match', value: Math.round(data.experienceMatch * 100) },
-        { label: 'Keyword Coverage', value: Math.round(data.keywordCoverage * 100) },
+        {
+            label: "Skill Alignment",
+            value: Math.round(score.skillAlignment * 100),
+        },
+        {
+            label: "Experience Match",
+            value: Math.round(score.experienceMatch * 100),
+        },
+        {
+            label: "Keyword Coverage",
+            value: Math.round(score.keywordCoverage * 100),
+        },
     ];
 
-    const strengthsSentences = parseSentences(data.insights.strengths);
-    const gapsSentences = parseSentences(data.insights.gaps);
+    const strengthsSentences = parseSentences(score.insights.strengths);
+    const gapsSentences = parseSentences(score.insights.gaps);
 
     return (
         <div className="space-y-4">
             <Card className="border-primary/20 bg-primary/[0.02]">
                 <CardHeader className="px-4 pt-4 pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                        <ChartPieSlice size={16} weight="duotone" className="text-primary" />
+                        <ChartPieSlice
+                            size={16}
+                            weight="duotone"
+                            className="text-primary"
+                        />
                         Match Score
                     </CardTitle>
                 </CardHeader>
@@ -105,10 +127,21 @@ export function ScorePanel({ score }: ScorePanelProps) {
                         <div className="flex-1 space-y-2">
                             <div className="flex items-center gap-2">
                                 <Badge
-                                    variant={matchScore >= 80 ? 'success' : matchScore >= 60 ? 'warning' : 'destructive'}
+                                    variant={
+                                        matchScore >= 80
+                                            ? "success"
+                                            : matchScore >= 60
+                                              ? "warning"
+                                              : "destructive"
+                                    }
                                     className="text-[10px]"
                                 >
-                                    {matchScore >= 80 ? 'Strong' : matchScore >= 60 ? 'Moderate' : 'Weak'} Match
+                                    {matchScore >= 80
+                                        ? "Strong"
+                                        : matchScore >= 60
+                                          ? "Moderate"
+                                          : "Weak"}{" "}
+                                    Match
                                 </Badge>
                             </div>
                             <p className="text-xs text-muted-foreground">
@@ -119,7 +152,11 @@ export function ScorePanel({ score }: ScorePanelProps) {
 
                     <div className="space-y-3">
                         {subScores.map(({ label, value }) => (
-                            <ScoreLabel key={label} label={label} value={value} />
+                            <ScoreLabel
+                                key={label}
+                                label={label}
+                                value={value}
+                            />
                         ))}
                     </div>
                 </CardContent>
@@ -129,14 +166,22 @@ export function ScorePanel({ score }: ScorePanelProps) {
                 <Card className="border-green-500/20 bg-green-500/5">
                     <CardHeader className="px-4 pt-4 pb-2">
                         <CardTitle className="text-sm flex items-center gap-2">
-                            <CheckCircle size={16} weight="duotone" className="text-green-500" />
+                            <CheckCircle
+                                size={16}
+                                weight="duotone"
+                                className="text-green-500"
+                            />
                             Matching Skills
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="px-4 pb-4">
                         <div className="flex flex-wrap gap-1.5">
-                            {data.matchingSkills.map((skill) => (
-                                <Badge key={skill} variant="success" className="text-[10px]">
+                            {score.matchingSkills.map((skill) => (
+                                <Badge
+                                    key={skill}
+                                    variant="success"
+                                    className="text-[10px]"
+                                >
                                     {skill}
                                 </Badge>
                             ))}
@@ -147,14 +192,22 @@ export function ScorePanel({ score }: ScorePanelProps) {
                 <Card className="border-orange-500/20 bg-orange-500/5">
                     <CardHeader className="px-4 pt-4 pb-2">
                         <CardTitle className="text-sm flex items-center gap-2">
-                            <XCircle size={16} weight="duotone" className="text-orange-500" />
+                            <XCircle
+                                size={16}
+                                weight="duotone"
+                                className="text-orange-500"
+                            />
                             Missing Skills
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="px-4 pb-4">
                         <div className="flex flex-wrap gap-1.5">
-                            {data.missingSkills.map((skill) => (
-                                <Badge key={skill} variant="warning" className="text-[10px]">
+                            {score.missingSkills.map((skill) => (
+                                <Badge
+                                    key={skill}
+                                    variant="warning"
+                                    className="text-[10px]"
+                                >
                                     {skill}
                                 </Badge>
                             ))}
@@ -166,14 +219,21 @@ export function ScorePanel({ score }: ScorePanelProps) {
             <Card className="border-primary/20 bg-primary/[0.02]">
                 <CardHeader className="px-4 pt-4 pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                        <ArrowRight size={16} weight="duotone" className="text-primary" />
+                        <ArrowRight
+                            size={16}
+                            weight="duotone"
+                            className="text-primary"
+                        />
                         Recommendations
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
                     <ul className="space-y-2">
-                        {data.recommendations.map((rec, i) => (
-                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                        {score.recommendations.map((rec, i) => (
+                            <li
+                                key={i}
+                                className="text-xs text-muted-foreground flex items-start gap-2"
+                            >
                                 <span className="text-primary mt-0.5">•</span>
                                 <span>{rec}</span>
                             </li>
@@ -185,14 +245,21 @@ export function ScorePanel({ score }: ScorePanelProps) {
             <Card className="border-teal-500/20 bg-gradient-to-br from-teal-500/10 to-emerald-500/5">
                 <CardHeader className="px-4 pt-4 pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                        <CheckCircle size={16} weight="duotone" className="text-teal-500" />
+                        <CheckCircle
+                            size={16}
+                            weight="duotone"
+                            className="text-teal-500"
+                        />
                         Strengths
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
                     <ul className="space-y-2">
                         {strengthsSentences.map((sentence, i) => (
-                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                            <li
+                                key={i}
+                                className="text-xs text-muted-foreground flex items-start gap-2"
+                            >
                                 <span className="text-teal-500 mt-0.5">•</span>
                                 <span>{sentence}</span>
                             </li>
@@ -204,15 +271,24 @@ export function ScorePanel({ score }: ScorePanelProps) {
             <Card className="border-orange-500/20 bg-gradient-to-br from-orange-500/10 to-amber-500/5">
                 <CardHeader className="px-4 pt-4 pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                        <XCircle size={16} weight="duotone" className="text-orange-500" />
+                        <XCircle
+                            size={16}
+                            weight="duotone"
+                            className="text-orange-500"
+                        />
                         Gaps
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
                     <ul className="space-y-2">
                         {gapsSentences.map((sentence, i) => (
-                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
-                                <span className="text-orange-500 mt-0.5">•</span>
+                            <li
+                                key={i}
+                                className="text-xs text-muted-foreground flex items-start gap-2"
+                            >
+                                <span className="text-orange-500 mt-0.5">
+                                    •
+                                </span>
                                 <span>{sentence}</span>
                             </li>
                         ))}

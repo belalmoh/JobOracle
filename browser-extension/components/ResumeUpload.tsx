@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 interface ResumeUploadProps {
     uploadState: "idle" | "selected" | "uploading" | "success" | "error";
     file: File | null;
+    fileInfo?: { name: string; type: string; size: number } | null;
     error: string | null;
     onUpload: (file: File) => void;
     onReset: () => void;
@@ -29,6 +30,7 @@ const MAX_SIZE_MB = 10;
 export function ResumeUpload({
     uploadState,
     file,
+    fileInfo,
     error,
     onUpload,
     onReset,
@@ -142,7 +144,7 @@ export function ResumeUpload({
                                 className="text-primary shrink-0"
                             />
                             <span className="text-xs font-medium truncate flex-1">
-                                {file ? file.name : "Resume uploaded"}
+                                {(file || fileInfo) ? (file?.name || fileInfo?.name) : "Resume uploaded"}
                             </span>
                             {onAnalyze && uploadState === "success" && (
                                 <Button

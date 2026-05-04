@@ -4,7 +4,9 @@ import type {
     ResumeData,
     ResumeAnalysisData,
     JobAnalysisResponse,
+    SerializedFile,
 } from "@/types";
+import { arrayBufferToBase64 } from "@/lib/utils";
 
 const DEFAULT_SETTINGS: ExtensionSettings = {
     theme: "system",
@@ -43,49 +45,55 @@ export async function setCurrentJob(job: JobData | null): Promise<void> {
     await browser.storage.local.set({ currentJob: job });
 }
 
+async function getBackendUrl(): Promise<string> {
+    const settings = await getSettings();
+    return settings.backendUrl;
+}
+
 export async function uploadResume(
     file: File,
     ownerId: string,
 ): Promise<{ data: ResumeData }> {
-    const settings = await getSettings();
-    const formData = new FormData();
-    formData.append("resume", file);
-    formData.append("ownerId", ownerId);
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = arrayBufferToBase64(arrayBuffer);
 
-    const response = await fetch(`${settings.backendUrl}/resume/upload`, {
-        method: "POST",
-        body: formData,
+    const serializedFile: SerializedFile = {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        base64,
+    };
+
+    const backendUrl = await getBackendUrl();
+
+    const response = await browser.runtime.sendMessage({
+        type: "UPLOAD_RESUME",
+        file: serializedFile,
+        ownerId,
+        backendUrl,
     });
 
-    if (!response.ok) {
-        throw new Error(
-            `Upload failed: ${response.status} ${response.statusText}`,
-        );
+    if (!response || !response.success) {
+        throw new Error(response?.error || "Upload failed via background");
     }
 
-    return response.json();
+    return { data: response.data };
 }
 
 export async function getResumeAnalysis(
     resumeAnalysisData: ResumeAnalysisData,
 ): Promise<JobAnalysisResponse> {
-    const settings = await getSettings();
+    const backendUrl = await getBackendUrl();
 
-    const response = await fetch(`${settings.backendUrl}/job/analyze`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            ...resumeAnalysisData,
-        }),
+    const response = await browser.runtime.sendMessage({
+        type: "GET_RESUME_ANALYSIS",
+        ...resumeAnalysisData,
+        backendUrl,
     });
 
-    if (!response.ok) {
-        throw new Error(
-            `Match score failed: ${response.status} ${response.statusText}`,
-        );
+    if (!response || !response.success) {
+        throw new Error(response?.error || "Analysis failed via background");
     }
 
-    return response.json();
+    return response.data as JobAnalysisResponse;
 }

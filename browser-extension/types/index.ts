@@ -167,18 +167,14 @@ export interface JobAnalysisInsights {
 }
 
 export interface JobAnalysisResponse {
-    success: boolean;
-    data: {
-        matchScore: number;
-        skillAlignment: number;
-        experienceMatch: number;
-        keywordCoverage: number;
-        matchingSkills: string[];
-        missingSkills: string[];
-        recommendations: string[];
-        insights: JobAnalysisInsights;
-    };
-    timestamp: string;
+    matchScore: number;
+    skillAlignment: number;
+    experienceMatch: number;
+    keywordCoverage: number;
+    matchingSkills: string[];
+    missingSkills: string[];
+    recommendations: string[];
+    insights: JobAnalysisInsights;
 }
 
 export interface FieldCategorizationResponse {
@@ -196,4 +192,12 @@ export interface ResumeAnalysisData {
     salary?: number;
     title: string;
     url: string;
+}
+
+// Serialized File for background proxy message passing
+export interface SerializedFile {
+    name: string;
+    type: string;
+    size: number;
+    base64: string;
 }
