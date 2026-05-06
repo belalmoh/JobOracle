@@ -167,14 +167,18 @@ export interface JobAnalysisInsights {
 }
 
 export interface JobAnalysisResponse {
-    matchScore: number;
-    skillAlignment: number;
-    experienceMatch: number;
-    keywordCoverage: number;
-    matchingSkills: string[];
-    missingSkills: string[];
-    recommendations: string[];
-    insights: JobAnalysisInsights;
+    success: boolean;
+    data: {
+        matchScore: number;
+        skillAlignment: number;
+        experienceMatch: number;
+        keywordCoverage: number;
+        matchingSkills: string[];
+        missingSkills: string[];
+        recommendations: string[];
+        insights: JobAnalysisInsights;
+    };
+    timestamp: string;
 }
 
 export interface FieldCategorizationResponse {

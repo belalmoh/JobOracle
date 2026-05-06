@@ -84,6 +84,8 @@ export function ResumeUpload({
         [validateAndUpload],
     );
 
+    console.log("uploadState: ", uploadState);
+
     return (
         <Card className="border-border/50">
             <CardHeader className="px-4 pt-4 pb-2">
@@ -144,13 +146,21 @@ export function ResumeUpload({
                                 className="text-primary shrink-0"
                             />
                             <span className="text-xs font-medium truncate flex-1">
-                                {(file || fileInfo) ? (file?.name || fileInfo?.name) : "Resume uploaded"}
+                                {file || fileInfo
+                                    ? file?.name || fileInfo?.name
+                                    : "Resume uploaded"}
                             </span>
                             {onAnalyze && uploadState === "success" && (
                                 <Button
                                     variant="default"
                                     size="sm"
-                                    className="h-6 text-xs gap-1 shrink-0 cursor-pointer"
+                                    className="h-6 text-xs gap-1 shrink-0 cursor-pointer whitespace-nowrap"
+                                    style={{
+                                        background: "oklch(45.7% 0.24 277.023)",
+                                        color: "white",
+                                        border: "none",
+                                        padding: "4px 12px",
+                                    }}
                                     onClick={onAnalyze}
                                     disabled={analyzing || disabled}
                                 >
@@ -172,11 +182,20 @@ export function ResumeUpload({
                                 <Button
                                     variant="secondary"
                                     size="sm"
-                                    className="h-6 text-xs gap-1 shrink-0 cursor-pointer"
+                                    className="h-6 text-xs gap-1 shrink-0 cursor-pointer whitespace-nowrap"
+                                    style={{
+                                        background: "#f3f4f6",
+                                        color: "#111827",
+                                        border: "1px solid #e5e7eb",
+                                        padding: "4px 12px",
+                                    }}
                                     onClick={onRetry}
                                     disabled={disabled}
                                 >
-                                    <ArrowClockwise size={12} weight="duotone" />
+                                    <ArrowClockwise
+                                        size={12}
+                                        weight="duotone"
+                                    />
                                     Retry
                                 </Button>
                             )}
@@ -185,7 +204,13 @@ export function ResumeUpload({
                                 <Button
                                     variant="destructive"
                                     size="sm"
-                                    className="h-6 text-xs gap-1 shrink-0 text-white cursor-pointer"
+                                    className="h-6 text-xs gap-1 shrink-0 text-white cursor-pointer whitespace-nowrap"
+                                    style={{
+                                        background: "#ef4444",
+                                        color: "white",
+                                        border: "none",
+                                        padding: "4px 12px",
+                                    }}
                                     onClick={onReset}
                                     title="Remove resume"
                                 >

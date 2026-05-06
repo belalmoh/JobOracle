@@ -88,25 +88,26 @@ function parseSentences(text: string): string[] {
 }
 
 export function ScorePanel({ score }: ScorePanelProps) {
-    const matchScore = score.matchScore;
+    const { data } = score; // For backward compatibility with previous code that used "data"
+    const matchScore = data.matchScore;
 
     const subScores = [
         {
             label: "Skill Alignment",
-            value: Math.round(score.skillAlignment * 100),
+            value: Math.round(data.skillAlignment * 100),
         },
         {
             label: "Experience Match",
-            value: Math.round(score.experienceMatch * 100),
+            value: Math.round(data.experienceMatch * 100),
         },
         {
             label: "Keyword Coverage",
-            value: Math.round(score.keywordCoverage * 100),
+            value: Math.round(data.keywordCoverage * 100),
         },
     ];
 
-    const strengthsSentences = parseSentences(score.insights.strengths);
-    const gapsSentences = parseSentences(score.insights.gaps);
+    const strengthsSentences = parseSentences(data.insights.strengths);
+    const gapsSentences = parseSentences(data.insights.gaps);
 
     return (
         <div className="space-y-4">
@@ -176,7 +177,7 @@ export function ScorePanel({ score }: ScorePanelProps) {
                     </CardHeader>
                     <CardContent className="px-4 pb-4">
                         <div className="flex flex-wrap gap-1.5">
-                            {score.matchingSkills.map((skill) => (
+                            {data.matchingSkills.map((skill) => (
                                 <Badge
                                     key={skill}
                                     variant="success"
@@ -202,7 +203,7 @@ export function ScorePanel({ score }: ScorePanelProps) {
                     </CardHeader>
                     <CardContent className="px-4 pb-4">
                         <div className="flex flex-wrap gap-1.5">
-                            {score.missingSkills.map((skill) => (
+                            {data.missingSkills.map((skill) => (
                                 <Badge
                                     key={skill}
                                     variant="warning"
@@ -229,7 +230,7 @@ export function ScorePanel({ score }: ScorePanelProps) {
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
                     <ul className="space-y-2">
-                        {score.recommendations.map((rec, i) => (
+                        {data.recommendations.map((rec, i) => (
                             <li
                                 key={i}
                                 className="text-xs text-muted-foreground flex items-start gap-2"

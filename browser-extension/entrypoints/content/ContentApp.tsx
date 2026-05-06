@@ -12,6 +12,7 @@ export default function ContentApp() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isJobPage, setIsJobPage] = useState(false);
     const [currentJob, setCurrentJob] = useState<JobData | null>(null);
+    const [fabDismissed, setFabDismissed] = useState(false);
 
     useEffect(() => {
         getSettings().then((s) => {
@@ -50,6 +51,7 @@ export default function ContentApp() {
     useEffect(() => {
         const onToggle = () => {
             setSidebarOpen((prev) => !prev);
+            setFabDismissed(false);
         };
         document.addEventListener(TOGGLE_EVENT, onToggle);
         return () => document.removeEventListener(TOGGLE_EVENT, onToggle);
@@ -63,13 +65,17 @@ export default function ContentApp() {
         setSidebarOpen(false);
     }, []);
 
+    const dismissFab = useCallback(() => {
+        setFabDismissed(true);
+    }, []);
+
     if (!settings) return null;
 
-    const showFab = settings.showFloatingButton && isJobPage && !sidebarOpen;
+    const showFab = settings.showFloatingButton && isJobPage && !sidebarOpen && !fabDismissed;
 
     return (
         <>
-            {showFab && <Fab onClick={openSidebar} />}
+            {showFab && <Fab onClick={openSidebar} onDismiss={dismissFab} />}
             {sidebarOpen && (
                 <Sidebar onClose={closeSidebar} />
             )}

@@ -86,12 +86,18 @@
 
 /* Content Script Scoped Styles */
 
-#joboracle-extension-root .j-fab {
+#joboracle-extension-root .j-fab-wrapper {
     position: fixed;
     top: 50%;
     right: 16px;
-    transform: translateY(-50%) scale(1);
+    transform: translateY(-50%);
     z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#joboracle-extension-root .j-fab {
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -108,18 +114,42 @@
 }
 
 #joboracle-extension-root .j-fab:hover {
-    transform: translateY(-50%) scale(1.08);
+    transform: scale(1.08);
 }
 
 @keyframes j-fab-in {
     from {
-        transform: translateY(-50%) scale(0);
+        transform: scale(0);
         opacity: 0;
     }
     to {
-        transform: translateY(-50%) scale(1);
+        transform: scale(1);
         opacity: 1;
     }
+}
+
+#joboracle-extension-root .j-fab-dismiss {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: var(--foreground, #111827);
+    color: var(--background, #ffffff);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    transition: transform 0.2s, background 0.2s;
+    z-index: 1;
+}
+
+#joboracle-extension-root .j-fab-dismiss:hover {
+    transform: scale(1.15);
+    background: var(--destructive, #ef4444);
 }
 
 #joboracle-extension-root .sidebar-container {
